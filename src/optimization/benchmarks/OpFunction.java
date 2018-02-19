@@ -1,5 +1,6 @@
 package optimization.benchmarks;
 
+import lombok.AllArgsConstructor;
 import util.Point;
 
 /** The Interface representing Optimizable Functions (Benchmarks) in 2D Space */
@@ -16,6 +17,16 @@ public interface OpFunction{
 	
 	
 	//---inner classes---
+	/** Meta Function that inverts the value given by held Function (If build with constructed with Function, returns -Rosenbrock) */
+	@AllArgsConstructor public static class InvertFunction implements OpFunction{
+		/** The Function that is Inverted */
+		private OpFunction function;
+		/** Returns inverse of the value of the held Function, i.e. value of 5 -> -5 etc. */
+		public double value(double x, double y){
+			return -function.value(x, y);
+		}
+	}
+	
 	/** Implementation of a 2 dimensional Rosenbrock Function */
 	public static class Rosenbrock implements OpFunction{
 		/** a value -> minimum at (a, a^2)*/
