@@ -15,11 +15,11 @@ public class EvoAlgorithm {
 	
 	/** The Selection algorithm, uses some method to decide which Individuals are fittest, and uses them as a base to create the next generation */
 	private List<Individual> selection(List<Tuple<Individual, Double>> evaluatedPopulation){
-		List<Individual> out = new ArrayList<Individual>();
+		List<Individual> nextGeneration = new ArrayList<Individual>();
 		//TODO: Use some election algorithm to find best individuals. Discard the worst. It's up to you whether you wanna keep some of the last generation.
 		//TODO: Fill the new generation with offspring generated using them (Just use the Individual(mother, father) constructor), make sure the parents are actually different individuals :P
 		//TODO: Put new generation in out List and return it
-		return out;
+		return nextGeneration;
 	}
 	
 	/** Given a list of Individuals, this method generates a List which contains Tuples containing the individuals of the given population and a double value representing the fitness of that individual. The list is sorted highest to lowest based on that fitness value */
