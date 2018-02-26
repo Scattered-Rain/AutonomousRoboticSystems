@@ -3,11 +3,14 @@ package evoAlgorithm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+import optimization.benchmarks.OpFunction.Rosenbrock;
+import optimization.benchmarks.OpFunction.Rastrigin;
 import util.Point;
 
 /** Class representing a single individual in the Evolutionary Algorithm */
 public class Individual{
+	private static final String BENCHMARK_FUNCTION = "ROSENBROCK";
+	private static final String FITNESS_FUNCTION = "RATIO";
 	
 	/** Reference to the EvoAlgorithm class that uses this Individual */
 	private EvoAlgorithm evo;
@@ -30,11 +33,42 @@ public class Individual{
 	
 	/** Returns the fitness value of this Individual */
 	public double fitness(){
-		//TODO: Write fitness function
-		return -1;
+		double a = 50;
+		String benchmarkFunction = BENCHMARK_FUNCTION;
+		String fitnessFunction = FITNESS_FUNCTION;
+		double x;
+		double F = 0.0;
+		
+		switch(benchmarkFunction) {
+		case "ROSENBROCK":
+			switch(fitnessFunction) {
+				case "POLYNOMIAL":
+					x = new Rosenbrock().value(genes.pheno());
+					F = x * a;
+					break;
+				
+				case "RATIO":
+					x = new Rosenbrock().value(genes.pheno());
+					F = Math.pow(x, a);
+					break;
+			}
+		
+		case "RASTRIGIN":
+			switch(fitnessFunction) {
+			case "POLYNOMIAL":
+				x = new Rastrigin().value(genes.pheno());
+				F = x * a;
+				break;
+			
+			case "RATIO":
+				x = new Rastrigin().value(genes.pheno());
+				F = Math.pow(x, a);
+				break;
+		
+			}
+		}
+		return F;
 	}
-	
-	
 	
 	//---Inner Classes---
 	/** Genotype of an Individual */
