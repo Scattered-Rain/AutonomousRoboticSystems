@@ -7,7 +7,7 @@ import lombok.Setter;
 public class Point{
 	
 	/** Epsilon value for comparions of float values */
-	private static final double EPSILON = 0.0001f;
+	private static final double EPSILON = 0.0001;
 	
 	/** The x value this Point holds */
 	@Getter @Setter private double x;

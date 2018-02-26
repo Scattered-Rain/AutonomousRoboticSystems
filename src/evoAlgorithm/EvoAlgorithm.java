@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
+import lombok.Getter;
 import util.Tuple;
 
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
-public class EvoAlgorithm {
-	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
-	public static final int NUMBER_OF_OFFSPRINGS_PER_COUPLE = 8;
-	public static final String SELECTION_ALGORITHM = "PROPORTIONATE";
+public class EvoAlgorithm{
+	
+	/** Random Object used for all random processed in the Algorithm */
+	@Getter private Random random = new Random();
+	
 	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
 	public void initEvolution(){
