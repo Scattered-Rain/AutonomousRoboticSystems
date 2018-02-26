@@ -33,7 +33,7 @@ public class PSOAlgorithm implements OpAlgorithm{
 		//Spawn
 		for(int c=0; c<particlePosition.length; c++){
 			particlePosition[c] = new Point(random.nextDouble()*spawnRange*2-spawnRange, random.nextDouble()*spawnRange*2-spawnRange);
-			lastVelocity[c] = new Point(0, 0);
+			lastVelocity[c] = new Point(random.nextDouble()*spawnRange-spawnRange/2, random.nextDouble()*spawnRange-spawnRange/2);
 			pBest[c] = Double.NEGATIVE_INFINITY;
 		}
 		//The result variables
@@ -79,7 +79,7 @@ public class PSOAlgorithm implements OpAlgorithm{
 				}
 				//Calc Velocity & update position
 				double r = 1;
-				Point newVelocity = lastVelocity[c].multiply(aA).add(pBestPos[c].substract(particlePosition[c]).multiply(bB * r)).add(gBestPos.substract(particlePosition[c]).multiply(cC * r));
+				Point newVelocity = (lastVelocity[c].multiply(aA)).add((pBestPos[c].substract(particlePosition[c])).multiply(bB * r)).add((gBestPos.substract(particlePosition[c])).multiply(cC * r));
 				lastVelocity[c] = newVelocity;
 				Point newLoc = particlePosition[c].add(newVelocity);
 				particlePosition[c] = newLoc;
