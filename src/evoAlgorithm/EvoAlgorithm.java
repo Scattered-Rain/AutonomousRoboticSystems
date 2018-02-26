@@ -6,17 +6,21 @@ import java.util.List;
 import java.util.Random;
 
 import lombok.Getter;
+import util.Point;
 import util.Tuple;
+
 import java.util.Scanner;
 
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
 public class EvoAlgorithm {
 	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
-	public static final int NUMBER_OF_OFFSPRINGS_PER_COUPLE = 0;
+	public static final int NUMBER_OF_OFFSPRINGS_PER_COUPLE = 8;
 	public static String SELECTION_ALGORITHM = "PROPORTIONATE";
 	
+	@Getter private Random random = new Random();
+	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
-	public void initEvolution(){
+	public Point initEvolution(){
 		
 		int  number_of_individuals = 100;
 		
@@ -24,7 +28,7 @@ public class EvoAlgorithm {
 		
 		//initialisation of number_of_individuals individuals
 		for(int i=1; i<=number_of_individuals; i++){
-			Individual individual = new Individual();
+			Individual individual = new Individual(this);
 			population.add(individual);
 		} 
 		
@@ -36,11 +40,16 @@ public class EvoAlgorithm {
 		SELECTION_ALGORITHM = selection_option;
 		
 		for (int i =0; i < 1000 ;i++){ //the loop can also be created as while fitness[t-1] != fitness[t]
+			System.out.println(3);
 			List<Individual> selected_individuals = selection(populationFitness);
-
+			System.out.println(4);
 			populationFitness.clear();
-			populationFitness = generateFitnessList(selected_individuals);		
-			}		
+			System.out.println(5);
+			populationFitness = generateFitnessList(selected_individuals);	
+			System.out.println(6);
+			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1));
+		}
+		return populationFitness.get(0).getA().getPoint();
 	}
 
 
@@ -240,18 +249,21 @@ public class EvoAlgorithm {
 		int numberofIndivuduals = proportionsPerIndividual.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
 		int[] selectedIndividualsIndexes = new int[numberOfSelectionsToBeMade];
+		for(int c=0; c<selectedIndividualsIndexes.length; c++){
+			selectedIndividualsIndexes[c] = -1;
+		}
 		List<Individual> selectedIndividuals = new ArrayList<Individual>();
 		
 		for (int i = 0; i < numberOfSelectionsToBeMade; i++) {
 			double selectedNumber = new Random().nextDouble();
 			int indexOfSelectedIndividual = returnIndexOfSelectedIndividual(selectedNumber, rouletteWheel);
 			Arrays.sort(selectedIndividualsIndexes);
+			System.out.println(indexOfSelectedIndividual);
 			
 			while (Arrays.binarySearch(selectedIndividualsIndexes, indexOfSelectedIndividual) >= 0) {
 				selectedNumber = new Random().nextDouble();
 				indexOfSelectedIndividual = returnIndexOfSelectedIndividual(selectedNumber, rouletteWheel);
 			}
-			
 			selectedIndividualsIndexes[i] = indexOfSelectedIndividual;
 			Individual selectedIndividual = proportionsPerIndividual.get(indexOfSelectedIndividual).getA();
 			selectedIndividuals.add(selectedIndividual);
@@ -274,11 +286,15 @@ public class EvoAlgorithm {
 		boolean found = false;
 		int indexOfSelectedIndividual = 0;
 		
+		System.out.println("g"+rouletteWheel[0]);
+		
 		for (int i = 0; i < rouletteWheel.length && !found; i++) {
 			if (selectedNumber >= sliceStartingPoint && selectedNumber < rouletteWheel[i]) {
 				found = true;
 				indexOfSelectedIndividual = i;
 			}
+			
+			sliceStartingPoint += rouletteWheel[i];
 		}
 		
 		return indexOfSelectedIndividual;

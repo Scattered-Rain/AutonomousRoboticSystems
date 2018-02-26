@@ -30,6 +30,11 @@ public class Individual{
 		this.genes = new Genes(mother.genes, father.genes, evo.getRandom());
 	}
 	
+	/** Returns Point */
+	public Point getPoint(){
+		return genes.pheno();
+	}
+	
 	
 	/** Returns the fitness value of this Individual */
 	public double fitness(){
