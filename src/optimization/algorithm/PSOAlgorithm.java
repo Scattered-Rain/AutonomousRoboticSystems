@@ -51,8 +51,25 @@ public class PSOAlgorithm implements OpAlgorithm{
 			//Update Velocity & Position
 			for(int c=0; c<particlePosition.length; c++){
 				//Find gBest (list based approach)
-				Point gBest = null;
-				
+				int numNeighbours = 3;
+				Point gBestPos = null;
+				double gBest = Double.NEGATIVE_INFINITY;
+				for(int n=-numNeighbours; n<numNeighbours; n++){
+					int spot = n;
+					if(n!=0){
+						if(c-spot < 0){
+							spot = numNeighbours-spot;
+						}
+						if(pBest[spot] > gBest){
+							gBest = pBest[spot];
+							gBestPos = pBestPos[spot];
+						}
+					}
+				}
+				//Calc Velocity
+				double r = 1;
+				Point newVelocity = lastVelocity[c].multiply(a).add(pBestPos[c].substract(particlePosition[c]).multiply(b * r)).add(gBestPos.substract(particlePosition[c]).multiply(c * r));
+				lastVelocity[c] = newVelocity;
 			}
 		}
 		//Return best found point
