@@ -7,18 +7,42 @@ import java.util.Random;
 
 import lombok.Getter;
 import util.Tuple;
+import java.util.Scanner;
 
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
-public class EvoAlgorithm{
-	
-	/** Random Object used for all random processed in the Algorithm */
-	@Getter private Random random = new Random();
-	
+public class EvoAlgorithm {
+	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
+	public static final int NUMBER_OF_OFFSPRINGS_PER_COUPLE = 0;
+	public static String SELECTION_ALGORITHM = "PROPORTIONATE";
 	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
 	public void initEvolution(){
-		//TODO: Actually write this
+		
+		int  number_of_individuals = 100;
+		
+		List population = new ArrayList();
+		
+		//initialisation of number_of_individuals individuals
+		for(int i=1; i<=number_of_individuals; i++){
+			Individual individual = new Individual();
+			population.add(individual);
+		} 
+		
+		List<Tuple<Individual, Double>> populationFitness = generateFitnessList(population);
+		
+		Scanner reader = new Scanner(System.in);				
+		System.out.println("Pick a selection Method(options: PROPORTIONATE, RANK-BASED, TRUNCATED RANK-BASED, TOURNAMENT):");
+		String selection_option = reader.nextLine();
+		SELECTION_ALGORITHM = selection_option;
+		
+		for (int i =0; i < 1000 ;i++){ //the loop can also be created as while fitness[t-1] != fitness[t]
+			List<Individual> selected_individuals = selection(populationFitness);
+
+			populationFitness.clear();
+			populationFitness = generateFitnessList(selected_individuals);		
+			}		
 	}
+
 
 	/**
 	 * The Selection algorithm, uses some method to decide which Individuals are fittest, and uses them as a base to create the 
