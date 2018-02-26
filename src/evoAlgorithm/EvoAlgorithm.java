@@ -2,11 +2,17 @@ package evoAlgorithm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import lombok.Getter;
 import util.Tuple;
 
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
-public class EvoAlgorithm {
+public class EvoAlgorithm{
+	
+	/** Random Object used for all random processed in the Algorithm */
+	@Getter private Random random = new Random();
+	
 	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
 	public void initEvolution(){
