@@ -14,7 +14,7 @@ import java.util.Scanner;
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
 public class EvoAlgorithm {
 	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
-	public static final int NUMBER_OF_OFFSPRINGS_PER_COUPLE = 8;
+	public static final int NUMBER_OF_OFFSPRINGS_TO_BE_CREATED = 80;
 	public static String SELECTION_ALGORITHM = "PROPORTIONATE";
 	
 	@Getter private Random random = new Random();
@@ -42,7 +42,7 @@ public class EvoAlgorithm {
 			List<Individual> selected_individuals = selection(populationFitness);
 			populationFitness.clear();
 			populationFitness = generateFitnessList(selected_individuals);	
-			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1));
+			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1).getA().getPoint());
 		}
 		return populationFitness.get(0).getA().getPoint();
 	}
@@ -104,8 +104,7 @@ public class EvoAlgorithm {
 		}
 		
 		List<Individual> selectedIndividuals = useRouletteWheel(proportionsPerIndividual);
-		int numberOfOffspringsPerCouple = NUMBER_OF_OFFSPRINGS_PER_COUPLE;
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsPerCouple);
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -134,8 +133,7 @@ public class EvoAlgorithm {
 		}
 		
 		List<Individual> selectedIndividuals = useRouletteWheel(proportionsPerIndividual);
-		int numberOfOffspringsPerCouple = NUMBER_OF_OFFSPRINGS_PER_COUPLE;
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsPerCouple);
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -155,8 +153,7 @@ public class EvoAlgorithm {
 		int numberofIndivuduals = rankedIndividuals.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
 		List<Individual> selectedIndividuals = rankedIndividuals.subList(0, numberOfSelectionsToBeMade);
-		int numberOfOffspringsPerCouple = NUMBER_OF_OFFSPRINGS_PER_COUPLE;
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsPerCouple);
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -350,27 +347,28 @@ public class EvoAlgorithm {
 	}
 	
 	/**
-	 * Given a list of selected individuals, this method allocates them into pairs and creates a number of new
-	 * new individuals to be their offsprings. Assuming that the number of selected individuals is even, the first
-	 * individual mates with the last one, the second with the penultimate one and so on and so forth. Each
-	 * couple procreates and produces a number of offsprings (which is specified on the corresponding constant at 
-	 * the beginning of the class).
+	 * Given a list of selected individuals, this method randomly allocates them into a number pairs which is equal to
+	 * the amount of offsprings to be created. Each couple then procreates and produces their offspring.
 	 * 
 	 * @param selectedIndividuals - A list of the selected individuals that will be used for reproduction
-	 * @param numberOfOffspringsPerCouple - The number of offsprings to be made per couple
+	 * @param numberOfOffspringsToBeCreated - The amount of offsprings to be created
 	 * @return - The produced offsprings
 	 */
-	private List<Individual> makeOffsprings(List<Individual> selectedIndividuals, int numberOfOffspringsPerCouple) {
+	private List<Individual> makeOffsprings(List<Individual> selectedIndividuals, int numberOfOffspringsToBeCreated) {
 		List<Individual> offsprings = new ArrayList<Individual>();
 		
-		for (int i = 0; i < selectedIndividuals.size()/2; i++) {
-			Individual mother = selectedIndividuals.get(i);
-			Individual father = selectedIndividuals.get(selectedIndividuals.size() - (i+1));
+		for (int i = 0; i < numberOfOffspringsToBeCreated; i++) {
+			int  indexOfMother = random.nextInt(selectedIndividuals.size());
+			int  indexOfFather = random.nextInt(selectedIndividuals.size());
 			
-			for (int j = 0; j < numberOfOffspringsPerCouple; j++) {
-				Individual offspring = new Individual(mother, father);
-				offsprings.add(offspring);
+			while (indexOfFather == indexOfMother) {
+				indexOfFather = random.nextInt(selectedIndividuals.size());
 			}
+			
+			Individual mother = selectedIndividuals.get(indexOfMother);
+			Individual father = selectedIndividuals.get(indexOfFather);
+			Individual offspring = new Individual(mother, father);
+			offsprings.add(offspring);
 		}
 		
 		return offsprings;
