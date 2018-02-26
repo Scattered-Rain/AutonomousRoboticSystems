@@ -44,6 +44,16 @@ public interface OpFunction{
 			double out = Math.pow((a - x), 2) + (b*Math.pow((y - Math.pow(y, 2)), 2));
 			return out;
 		}
+		/** Sets A */
+		public Rosenbrock setA(double a){
+			this.a = a;
+			return this;
+		}
+		/** Sets B */
+		public Rosenbrock setB(double b){
+			this.b = b;
+			return this;
+		}
 	}
 	
 	/** Implementation of a 2 dimensional Rastrigin Function (Known global minimum at 0|0) */
