@@ -9,8 +9,8 @@ import util.Point;
 
 /** Class representing a single individual in the Evolutionary Algorithm */
 public class Individual{
-	private static final String BENCHMARK_FUNCTION = "ROSENBROCK";
-	private static final String FITNESS_FUNCTION = "RATIO";
+	private static final String BENCHMARK_FUNCTION = "RASTRIGIN";
+	private static final String FITNESS_FUNCTION = "POLYNOMIAL";
 	
 	/** Reference to the EvoAlgorithm class that uses this Individual */
 	private EvoAlgorithm evo;
@@ -38,7 +38,7 @@ public class Individual{
 	
 	/** Returns the fitness value of this Individual */
 	public double fitness(){
-		double a = 50;
+		double a = 0.05;
 		String benchmarkFunction = BENCHMARK_FUNCTION;
 		String fitnessFunction = FITNESS_FUNCTION;
 		double x;
@@ -72,6 +72,7 @@ public class Individual{
 		
 			}
 		}
+		
 		return F;
 	}
 	
@@ -80,9 +81,9 @@ public class Individual{
 	private static class Genes{
 		
 		/** Minimal value possible for a number in vals */
-		private static final double MIN_VAL = 0.01;
+		private static final double MIN_VAL = 0.5;
 		/** Maximal value possible for a number in vals */
-		private static final double MAX_VAL = 100;
+		private static final double MAX_VAL = 1.5;
 		/** The length of the three arrays */
 		private static final int LENGTH = 128;
 		/** The likelyhood of mutation to occur per operation */
@@ -147,7 +148,7 @@ public class Individual{
 		
 		/** Returns a Point representing the expression of this set of Genes */
 		public Point pheno(){
-			double[] xy = new double[]{0, 0};
+			double[] xy = new double[]{1, 1};
 			List<Integer>[] lxy = xyVals;
 			for(int c=0; c<lxy.length; c++){
 				for(int c2=0; c2<lxy[c].size(); c2++){
@@ -157,5 +158,4 @@ public class Individual{
 			return new Point(xy[0], xy[1]);
 		}
 	}
-	
 }

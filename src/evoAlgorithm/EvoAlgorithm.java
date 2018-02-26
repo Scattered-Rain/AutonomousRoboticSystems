@@ -21,9 +21,7 @@ public class EvoAlgorithm {
 	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
 	public Point initEvolution(){
-		
 		int  number_of_individuals = 100;
-		
 		List population = new ArrayList();
 		
 		//initialisation of number_of_individuals individuals
@@ -37,16 +35,13 @@ public class EvoAlgorithm {
 		Scanner reader = new Scanner(System.in);				
 		System.out.println("Pick a selection Method(options: PROPORTIONATE, RANK-BASED, TRUNCATED RANK-BASED, TOURNAMENT):");
 		String selection_option = reader.nextLine();
+		reader.close();
 		SELECTION_ALGORITHM = selection_option;
 		
 		for (int i =0; i < 1000 ;i++){ //the loop can also be created as while fitness[t-1] != fitness[t]
-			System.out.println(3);
 			List<Individual> selected_individuals = selection(populationFitness);
-			System.out.println(4);
 			populationFitness.clear();
-			System.out.println(5);
 			populationFitness = generateFitnessList(selected_individuals);	
-			System.out.println(6);
 			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1));
 		}
 		return populationFitness.get(0).getA().getPoint();
@@ -180,20 +175,19 @@ public class EvoAlgorithm {
 		int numberofIndivuduals = evaluatedPopulation.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
 		int numberOfOffspringsToBeGenerated = numberOfSelectionsToBeMade/2;
-		int[] drawnIndividuals = new int[numberOfSelectionsToBeMade];
+		List<Integer> drawnIndividuals = new ArrayList<Integer>();
 		List<Tuple<Individual, Double>> winningIndividuals = new ArrayList<Tuple<Individual, Double>>();
 		List<Individual> selectedIndividuals = new ArrayList<Individual>();
 		
 		for (int i = 0; i < numberOfOffspringsToBeGenerated; i++) {
 			for (int j = 0; j < numberOfSelectionsToBeMade; j++) {
-				int  indexOfWinningIndividual = new Random().nextInt(numberofIndivuduals);
-				Arrays.sort(drawnIndividuals);
+				int  indexOfWinningIndividual = random.nextInt(numberofIndivuduals);
 				
-				while (Arrays.binarySearch(drawnIndividuals, indexOfWinningIndividual) >= 0) {
-					indexOfWinningIndividual = new Random().nextInt(numberofIndivuduals);
+				while (drawnIndividuals.contains(indexOfWinningIndividual)) {
+					indexOfWinningIndividual = random.nextInt(numberofIndivuduals);
 				}
 				
-				drawnIndividuals[j] = indexOfWinningIndividual;
+				drawnIndividuals.add(indexOfWinningIndividual);
 				Tuple<Individual, Double> winningIndividual = evaluatedPopulation.get(indexOfWinningIndividual);
 				winningIndividuals.add(winningIndividual);
 			}
@@ -248,23 +242,19 @@ public class EvoAlgorithm {
 		double[] rouletteWheel = buildRouletteWheel(proportionsPerIndividual);
 		int numberofIndivuduals = proportionsPerIndividual.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
-		int[] selectedIndividualsIndexes = new int[numberOfSelectionsToBeMade];
-		for(int c=0; c<selectedIndividualsIndexes.length; c++){
-			selectedIndividualsIndexes[c] = -1;
-		}
+		List<Integer> selectedIndividualsIndexes = new ArrayList<Integer>();
 		List<Individual> selectedIndividuals = new ArrayList<Individual>();
 		
 		for (int i = 0; i < numberOfSelectionsToBeMade; i++) {
-			double selectedNumber = new Random().nextDouble();
+			double selectedNumber = random.nextDouble();
 			int indexOfSelectedIndividual = returnIndexOfSelectedIndividual(selectedNumber, rouletteWheel);
-			Arrays.sort(selectedIndividualsIndexes);
-			System.out.println(indexOfSelectedIndividual);
 			
-			while (Arrays.binarySearch(selectedIndividualsIndexes, indexOfSelectedIndividual) >= 0) {
-				selectedNumber = new Random().nextDouble();
+			while (selectedIndividualsIndexes.contains(indexOfSelectedIndividual)) {
+				selectedNumber = random.nextDouble();
 				indexOfSelectedIndividual = returnIndexOfSelectedIndividual(selectedNumber, rouletteWheel);
 			}
-			selectedIndividualsIndexes[i] = indexOfSelectedIndividual;
+
+			selectedIndividualsIndexes.add(indexOfSelectedIndividual);
 			Individual selectedIndividual = proportionsPerIndividual.get(indexOfSelectedIndividual).getA();
 			selectedIndividuals.add(selectedIndividual);
 		}
@@ -285,9 +275,7 @@ public class EvoAlgorithm {
 		int sliceStartingPoint = 0;
 		boolean found = false;
 		int indexOfSelectedIndividual = 0;
-		
-		System.out.println("g"+rouletteWheel[0]);
-		
+				
 		for (int i = 0; i < rouletteWheel.length && !found; i++) {
 			if (selectedNumber >= sliceStartingPoint && selectedNumber < rouletteWheel[i]) {
 				found = true;
