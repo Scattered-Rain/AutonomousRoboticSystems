@@ -11,6 +11,10 @@ public class PSOAlgorithm implements OpAlgorithm{
 	/** Random Object which is used for all random operations in PSO */
 	private Random random = new Random();
 	
+	private double a = 0.3;
+	private double b = 0.3;
+	private double c = 0.3;
+	
 	/** The Number of Particles this instance of the PSO uses */
 	private int numberOfParticles = 64;
 	/** The Max Number of Iterations this instance of the PSO will run */
@@ -25,9 +29,7 @@ public class PSOAlgorithm implements OpAlgorithm{
 		Point[] particlePosition = new Point[numberOfParticles];
 		Point[] pBestPos = new Point[numberOfParticles];
 		double[] pBest = new double[numberOfParticles];
-		//gBest
-		Point gBestPos = null;
-		double gBest = Double.NEGATIVE_INFINITY;
+		Point[] lastVelocity = new Point[numberOfParticles];
 		//Spawn
 		for(int c=0; c<particlePosition.length; c++){
 			particlePosition[c] = new Point(random.nextDouble()*spawnRange*2-spawnRange, random.nextDouble()*spawnRange*2-spawnRange);
@@ -46,14 +48,15 @@ public class PSOAlgorithm implements OpAlgorithm{
 					}
 				}
 			}
-			if(pBest[newBestIndex] > gBest){
-				gBest = pBest[newBestIndex];
-				gBestPos = pBestPos[newBestIndex];
+			//Update Velocity & Position
+			for(int c=0; c<particlePosition.length; c++){
+				//Find gBest (list based approach)
+				Point gBest = null;
+				
 			}
-			
 		}
 		//Return best found point
-		return gBestPos;
+		return null;
 	}
 	
 	
