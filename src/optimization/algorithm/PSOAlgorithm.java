@@ -1,23 +1,59 @@
 package optimization.algorithm;
 
+import java.util.Random;
+
 import optimization.benchmarks.OpFunction;
 import util.Point;
 
 /** Particle Swarm Optimization Algorithm */
 public class PSOAlgorithm implements OpAlgorithm{
 	
+	/** Random Object which is used for all random operations in PSO */
+	private Random random = new Random();
+	
 	/** The Number of Particles this instance of the PSO uses */
 	private int numberOfParticles = 64;
-	/** The Max Number of Iterations this instance of the PSO will run (not including maxOptimazationDeltaIterations), -1=infinity */
+	/** The Max Number of Iterations this instance of the PSO will run */
 	private int maxNumberOfIterations = 128;
-	/** The Max Number of Iterations without improvement in the best value after which the PSO will stop  (if maxNumberIterations reached or -1) */
-	private double maxOptimazationDeltaIterations = 16;
+	/** The Range from which the particles are spawned at (around 0|0) */
+	private double spawnRange = 128;
 	
 	
 	/** Optimizes given Function */
 	public Point optimize(OpFunction toOptimize){
-		//TODO: Write the actual algorithm :P
-		return null;
+		//The particles, position and pBest, index linked
+		Point[] particlePosition = new Point[numberOfParticles];
+		Point[] pBestPos = new Point[numberOfParticles];
+		double[] pBest = new double[numberOfParticles];
+		//gBest
+		Point gBestPos = null;
+		double gBest = Double.NEGATIVE_INFINITY;
+		//Spawn
+		for(int c=0; c<particlePosition.length; c++){
+			particlePosition[c] = new Point(random.nextDouble()*spawnRange*2-spawnRange, random.nextDouble()*spawnRange*2-spawnRange);
+		}
+		//The Actual PSO Loop
+		for(int iteration=0; iteration<maxNumberOfIterations; iteration++){
+			//Figure out all new fitness (and update pBest)
+			int newBestIndex = -1;
+			for(int c=0; c<particlePosition.length; c++){
+				double currentP = toOptimize.value(particlePosition[c]);
+				if(currentP > pBest[c]){
+					pBest[c] = currentP;
+					pBestPos[c] = particlePosition[c];
+					if(newBestIndex==-1 || pBest[c] > pBest[newBestIndex]){
+						newBestIndex = c;
+					}
+				}
+			}
+			if(pBest[newBestIndex] > gBest){
+				gBest = pBest[newBestIndex];
+				gBestPos = pBestPos[newBestIndex];
+			}
+			
+		}
+		//Return best found point
+		return gBestPos;
 	}
 	
 	
@@ -27,15 +63,15 @@ public class PSOAlgorithm implements OpAlgorithm{
 		return this;
 	}
 	
-	/** Set the max Number of Iterations (not including optimiazation delta iterations */
+	/** Set the max Number of Iterations */
 	public PSOAlgorithm setMaxNumberOfIterations(int maxIterations){
 		this.maxNumberOfIterations = maxIterations;
 		return this;
 	}
 	
-	/** Set the max Number of Iterations without improvement that the algorithm will stop after max number of iterations is reached */
-	public PSOAlgorithm setMaxOptimizationDeltaIterations(int maxOpDeltaIterations){
-		this.maxOptimazationDeltaIterations = maxOpDeltaIterations;
+	/** Set the spawn range around 0|0 */
+	public PSOAlgorithm setSpawnRange(double range){
+		this.spawnRange = range;
 		return this;
 	}
 	
