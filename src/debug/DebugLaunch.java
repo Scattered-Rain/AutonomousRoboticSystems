@@ -8,7 +8,7 @@ import graphing.GraphElement;
 public class DebugLaunch{
 	
 	public static void main(String[] args){
-		new Graph(480, 400).addGraphElement(new GraphElement.GraphOpFunction(new OpFunction.Rastrigin(), new Point(0, 0), 0.14)).updateImg();
+		new Graph(480, 400).addGraphElement(new GraphElement.GraphOpFunction(new OpFunction.Rastrigin(), new Point(0, 0), 0.05)).updateImg();
 	}
 	
 }

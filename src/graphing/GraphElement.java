@@ -44,14 +44,13 @@ public abstract class GraphElement{
 					}
 				}
 			}
-			System.out.println(high+" "+low);
 			//double colScale = 1/(high*high-low*low);
 			//Render
 			for(int cy=0; cy<imgHeight; cy++){
 				for(int cx=0; cx<imgWidth; cx++){
 					double opVal = function.value(start.add((new Point(cx, imgHeight-cy).multiply(scale))));
-					//int rgb = Color.HSBtoRGB((float)(opVal>1?1:opVal), 1.0f, 1.0f);
-					Color col = new Color((int)opVal);
+					int rgb = Color.HSBtoRGB((float)(opVal/high), 1.0f, 1.0f);
+					Color col = new Color(rgb);//(int)opVal);
 					g.setColor(col);
 					g.drawRect(cx, cy, 0, 0);
 				}
