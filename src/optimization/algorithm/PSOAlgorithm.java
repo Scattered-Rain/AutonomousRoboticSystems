@@ -11,9 +11,9 @@ public class PSOAlgorithm implements OpAlgorithm{
 	/** Random Object which is used for all random operations in PSO */
 	private Random random = new Random();
 	
-	private double aA = 0.3;
-	private double bB = 0.3;
-	private double cC = 0.3;
+	private double velocityC = 0.01;
+	private double pBestC = 0.02;
+	private double gBestC = 0.02;
 	
 	/** The Number of Particles this instance of the PSO uses */
 	private int numberOfParticles = 64;
@@ -42,19 +42,14 @@ public class PSOAlgorithm implements OpAlgorithm{
 		//The Actual PSO Loop
 		for(int iteration=0; iteration<maxNumberOfIterations; iteration++){
 			//Figure out all new fitness (and update pBest)
-			int newBestIndex = -1;
 			for(int c=0; c<particlePosition.length; c++){
 				double currentP = toOptimize.value(particlePosition[c]);
 				if(currentP > pBest[c]){
 					pBest[c] = currentP;
 					pBestPos[c] = particlePosition[c];
-					if(newBestIndex==-1 || pBest[c] > pBest[newBestIndex]){
-						newBestIndex = c;
-						//check if new global best
-						if(pBest[c] > bestVal){
-							bestVal = pBest[c];
-							bestPoint = pBestPos[c];
-						}
+					if(pBest[c] > bestVal){
+						bestVal = pBest[c];
+						bestPoint = pBestPos[c];
 					}
 				}
 			}
@@ -78,8 +73,7 @@ public class PSOAlgorithm implements OpAlgorithm{
 					}
 				}
 				//Calc Velocity & update position
-				double r = 1;
-				Point newVelocity = (lastVelocity[c].multiply(aA)).add((pBestPos[c].substract(particlePosition[c])).multiply(bB * r)).add((gBestPos.substract(particlePosition[c])).multiply(cC * r));
+				Point newVelocity = (lastVelocity[c].multiply(velocityC)).add((pBestPos[c].substract(particlePosition[c])).multiply(pBestC * random.nextDouble())).add((gBestPos.substract(particlePosition[c])).multiply(gBestC * random.nextDouble()));
 				lastVelocity[c] = newVelocity;
 				Point newLoc = particlePosition[c].add(newVelocity);
 				particlePosition[c] = newLoc;

@@ -1,5 +1,6 @@
 package debug;
 
+import graphing.Panel;
 import optimization.algorithm.PSOAlgorithm;
 import optimization.benchmarks.OpFunction;
 import util.Point;
@@ -7,8 +8,10 @@ import util.Point;
 public class DebugLaunch{
 	
 	public static void main(String[] args){
-		PSOAlgorithm pso = new PSOAlgorithm().setMaxNumberOfIterations(1000);
-		Point best = pso.optimize(new OpFunction.InvertFunction(new OpFunction.Rosenbrock().setA(1)));
+		OpFunction f = new OpFunction.InvertFunction(new OpFunction.Rosenbrock().setA(5));
+		PSOAlgorithm pso = new PSOAlgorithm().setMaxNumberOfIterations(10000);
+		Point best = pso.optimize(f);
+		System.out.println(best+" "+f.value(best));
 	}
 
 }
