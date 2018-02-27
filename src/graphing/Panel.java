@@ -57,12 +57,17 @@ public abstract class Panel extends JPanel{
 	}
 	
 	/** Init Graphical Update of Panel */
-	public final void update(){
-		//TODO: Write this method
+	public final void updateImg(){
+		BufferedImage bi = new BufferedImage(panelWidth, panelHeight, BufferedImage.TYPE_3BYTE_BGR);
+		Graphics2D g = bi.createGraphics();
+		doUpdateImg(g, bi);
+		this.bufferImage = bi;
+		g.dispose();
+		repaint();
 	}
 	
 	/** Actual drawing process to update the Buffered Image */
-	protected abstract BufferedImage doUpdateImg(Graphics2D g, BufferedImage img);
+	protected abstract void doUpdateImg(Graphics2D g, BufferedImage img);
 	
 	
 	//---Inner Classes---
