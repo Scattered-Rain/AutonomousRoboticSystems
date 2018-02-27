@@ -81,7 +81,7 @@ public class Individual{
 		/** The length of the three arrays */
 		private static final int LENGTH = 128;
 		/** The likelyhood of mutation to occur per operation */
-		private static final double MUTATION_CHANCE_PER_OPERATION = 0.9/LENGTH;
+		private static final double MUTATION_CHANCE_PER_OPERATION = 0.75/LENGTH;
 		
 		
 		/** A List of raw Double values */
