@@ -14,7 +14,7 @@ import java.util.Scanner;
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
 public class EvoAlgorithm {
 	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
-	public static final int NUMBER_OF_OFFSPRINGS_TO_BE_CREATED = 80;
+	public static final double PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS = 0.8;
 	public static String SELECTION_ALGORITHM = "PROPORTIONATE";
 	
 	@Getter private Random random = new Random();
@@ -31,7 +31,6 @@ public class EvoAlgorithm {
 		} 
 		
 		List<Tuple<Individual, Double>> populationFitness = generateFitnessList(population);
-		
 		Scanner reader = new Scanner(System.in);				
 		System.out.println("Pick a selection Method(options: PROPORTIONATE, RANK-BASED, TRUNCATED RANK-BASED, TOURNAMENT):");
 		String selection_option = reader.nextLine();
@@ -41,9 +40,11 @@ public class EvoAlgorithm {
 		for (int i =0; i < 1000 ;i++){ //the loop can also be created as while fitness[t-1] != fitness[t]
 			List<Individual> selected_individuals = selection(populationFitness);
 			populationFitness.clear();
-			populationFitness = generateFitnessList(selected_individuals);	
+			populationFitness = generateFitnessList(selected_individuals);
+			System.out.println("==== ITERATION NO. " + String.valueOf(i+1) + " ====");
 			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1).getA().getPoint());
 		}
+		
 		return populationFitness.get(0).getA().getPoint();
 	}
 
@@ -94,17 +95,18 @@ public class EvoAlgorithm {
 	 */
 	private List<Individual> proportionateSelection(List<Tuple<Individual, Double>> evaluatedPopulation){
 		double populationFitness = calculatePopulationFitness(evaluatedPopulation);
+		int numberOfOffspringsToBeGenerated = (int)Math.round(evaluatedPopulation.size() * PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS);
 		List<Tuple<Individual, Double>> proportionsPerIndividual = new ArrayList<Tuple<Individual, Double>>();
 		
 		for (Tuple<Individual, Double> t: evaluatedPopulation) {
 			Individual individual = (Individual)t.getA();
 			double fitness = (Double)t.getB();
-			double proportion = fitness/populationFitness;
+			double proportion = (double)fitness/(double)populationFitness;
 			proportionsPerIndividual.add(new Tuple<Individual, Double>(individual, proportion));
 		}
 		
 		List<Individual> selectedIndividuals = useRouletteWheel(proportionsPerIndividual);
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsToBeGenerated);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -121,6 +123,7 @@ public class EvoAlgorithm {
 	 * @return - The new version of the population
 	 */
 	private List<Individual> rankBasedSelection(List<Tuple<Individual, Double>> evaluatedPopulation){
+		int numberOfOffspringsToBeGenerated = (int)Math.round(evaluatedPopulation.size() * PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS);
 		List<Individual> rankedIndividuals = rankIndividuals(evaluatedPopulation);
 		int sumOfRanks = calculateSumOfRanks(rankedIndividuals);
 		List<Tuple<Individual, Double>> proportionsPerIndividual = new ArrayList<Tuple<Individual, Double>>();
@@ -128,12 +131,12 @@ public class EvoAlgorithm {
 		for (int i = 0; i < rankedIndividuals.size(); i++) {
 			int rank = i + 1;
 			Individual individual = (Individual)rankedIndividuals.get(i);
-			double proportion = (1 - rank)/sumOfRanks;
+			double proportion = ((double)rank/(double)sumOfRanks);
 			proportionsPerIndividual.add(new Tuple<Individual, Double>(individual, proportion));
 		}
 		
 		List<Individual> selectedIndividuals = useRouletteWheel(proportionsPerIndividual);
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsToBeGenerated);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -152,8 +155,9 @@ public class EvoAlgorithm {
 		List<Individual> rankedIndividuals = rankIndividuals(evaluatedPopulation);
 		int numberofIndivuduals = rankedIndividuals.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
-		List<Individual> selectedIndividuals = rankedIndividuals.subList(0, numberOfSelectionsToBeMade);
-		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, NUMBER_OF_OFFSPRINGS_TO_BE_CREATED);
+		int numberOfOffspringsToBeGenerated = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS);
+		List<Individual> selectedIndividuals = rankedIndividuals.subList(numberOfSelectionsToBeMade, rankedIndividuals.size());
+		List<Individual> newGeneration = makeOffsprings(selectedIndividuals, numberOfOffspringsToBeGenerated);
 		selectedIndividuals.addAll(newGeneration);
 		return selectedIndividuals;	
 	}
@@ -171,12 +175,13 @@ public class EvoAlgorithm {
 	private List<Individual> tournamentSelection(List<Tuple<Individual, Double>> evaluatedPopulation){
 		int numberofIndivuduals = evaluatedPopulation.size();
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_SELECTED);
-		int numberOfOffspringsToBeGenerated = numberOfSelectionsToBeMade/2;
-		List<Integer> drawnIndividuals = new ArrayList<Integer>();
-		List<Tuple<Individual, Double>> winningIndividuals = new ArrayList<Tuple<Individual, Double>>();
-		List<Individual> selectedIndividuals = new ArrayList<Individual>();
+		int numberOfOffspringsToBeGenerated = (int)Math.round(numberofIndivuduals * PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS);
+		List<Individual> newGeneration = new ArrayList<Individual>();
 		
 		for (int i = 0; i < numberOfOffspringsToBeGenerated; i++) {
+			List<Integer> drawnIndividuals = new ArrayList<Integer>();
+			List<Tuple<Individual, Double>> winningIndividuals = new ArrayList<Tuple<Individual, Double>>();
+			
 			for (int j = 0; j < numberOfSelectionsToBeMade; j++) {
 				int  indexOfWinningIndividual = random.nextInt(numberofIndivuduals);
 				
@@ -190,13 +195,13 @@ public class EvoAlgorithm {
 			}
 			
 			List<Individual> rankedIndividuals = rankIndividuals(winningIndividuals);
-			selectedIndividuals = rankedIndividuals.subList(0, 2);
+			List<Individual> selectedIndividuals = rankedIndividuals.subList(rankedIndividuals.size()-2, rankedIndividuals.size());
 			Individual newOffspring = makeOffsprings(selectedIndividuals, 1).get(0);
-			evaluatedPopulation.add(new Tuple<Individual, Double>(newOffspring, 0.0));
+			newGeneration.add(newOffspring);
 		}
 		
-		return convertToCollectionOfIndividuals(evaluatedPopulation);	
-		}
+		return newGeneration;	
+	}
 	
 	/**
 	 * A helper method for all the Selection algorithms that make use of a roulette wheel. The whole roulette covers 
@@ -269,7 +274,7 @@ public class EvoAlgorithm {
 	 * @return - The index of the individual that was selected by the spin of the roulette wheel
 	 */
 	private int returnIndexOfSelectedIndividual(double selectedNumber, double[] rouletteWheel) {
-		int sliceStartingPoint = 0;
+		double sliceStartingPoint = 0.0;
 		boolean found = false;
 		int indexOfSelectedIndividual = 0;
 				
@@ -279,7 +284,7 @@ public class EvoAlgorithm {
 				indexOfSelectedIndividual = i;
 			}
 			
-			sliceStartingPoint += rouletteWheel[i];
+			sliceStartingPoint = rouletteWheel[i];
 		}
 		
 		return indexOfSelectedIndividual;
@@ -319,10 +324,10 @@ public class EvoAlgorithm {
 	}
 	
 	/**
-	 * This method ranks the evaluated population with respect to their fitness value in decreasing order.
+	 * This method ranks the evaluated population with respect to their fitness value in increasing order.
 	 * 
 	 * @param evaluatedPopulation - A list of evaluated individuals
-	 * @return - A sorted version of the above list in decreasing order
+	 * @return - A sorted version of the above list in increasing order
 	 */
 	private List<Individual> rankIndividuals(List<Tuple<Individual, Double>> evaluatedPopulation) {
 	    int n = evaluatedPopulation.size();
@@ -332,10 +337,10 @@ public class EvoAlgorithm {
 			j = 0;
 					
 	    	for (int i = 1; i < n; i++) {
-	    		if (evaluatedPopulation.get(i-1).getB() < evaluatedPopulation.get(i).getB()) {
+	    		if (evaluatedPopulation.get(i-1).getB() > evaluatedPopulation.get(i).getB()) {
 	    			Tuple<Individual, Double> temp = evaluatedPopulation.get(i-1);
-	    			evaluatedPopulation.add(i-1, evaluatedPopulation.get(i));
-	    			evaluatedPopulation.add(i, temp);
+	    			evaluatedPopulation.set(i-1, evaluatedPopulation.get(i));
+	    			evaluatedPopulation.set(i, temp);
 	    			j = i;
 	    		}
  	    	}
@@ -394,9 +399,15 @@ public class EvoAlgorithm {
 	/** Given a list of Individuals, this method generates a List which contains Tuples containing the individuals of the given population and a double value representing the fitness of that individual. The list is sorted highest to lowest based on that fitness value */
 	private List<Tuple<Individual, Double>> generateFitnessList(List<Individual> population){
 		List<Tuple<Individual, Double>> out = new ArrayList<Tuple<Individual, Double>>();
+		double minVal = Double.POSITIVE_INFINITY;
 		for(int c=0; c<population.size(); c++){
 			out.add(new Tuple<Individual, Double>(population.get(c), population.get(c).fitness()));
+
+			if(population.get(c).fitness() < minVal) {
+				minVal = population.get(c).fitness();
+			}
 		}
+
 		for(int c=0; c<out.size(); c++){
 			for(int c2=c+1; c2<out.size(); c2++){
 				if(out.get(c).getB()<out.get(c2).getB()){
@@ -406,6 +417,13 @@ public class EvoAlgorithm {
 				}
 			}
 		}
+
+		for(int c=0; c<out.size(); c++) {
+			out.get(c).setB(out.get(c).getB()+Math.abs(minVal)+0.000001);
+		}
+		
+		System.out.println(out.get(0).getA().getPoint() + " " + (out.get(0).getB()));
+		System.out.println(out.get(out.size()-1).getA().getPoint() + " " + (out.get(out.size()-1).getB()));
 		return out;
 	}
 }

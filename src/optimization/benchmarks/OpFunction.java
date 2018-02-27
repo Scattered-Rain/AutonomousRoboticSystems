@@ -31,7 +31,7 @@ public interface OpFunction{
 	/** Implementation of a 2 dimensional Rosenbrock Function */
 	@NoArgsConstructor public static class Rosenbrock implements OpFunction{
 		/** a value -> minimum at (a, a^2)*/
-		private double a = 0;
+		private double a = 3;
 		/** b value (doesn't influence minimum?) */
 		private double b = 100;
 		/**Constructs new Rosenbrock Function with given A and B values */

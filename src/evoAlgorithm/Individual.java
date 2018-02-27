@@ -9,7 +9,7 @@ import util.Point;
 
 /** Class representing a single individual in the Evolutionary Algorithm */
 public class Individual{
-	private static final String BENCHMARK_FUNCTION = "RASTRIGIN";
+	private static final String BENCHMARK_FUNCTION = "ROSENBROCK";
 	private static final String FITNESS_FUNCTION = "POLYNOMIAL";
 	
 	/** Reference to the EvoAlgorithm class that uses this Individual */
@@ -38,7 +38,7 @@ public class Individual{
 	
 	/** Returns the fitness value of this Individual */
 	public double fitness(){
-		double a = 0.05;
+		double a = 0.005;
 		String benchmarkFunction = BENCHMARK_FUNCTION;
 		String fitnessFunction = FITNESS_FUNCTION;
 		double x;
@@ -49,12 +49,12 @@ public class Individual{
 			switch(fitnessFunction) {
 				case "POLYNOMIAL":
 					x = new Rosenbrock().value(genes.pheno());
-					F = x * a;
+					F = -x;
 					break;
 				
 				case "RATIO":
 					x = new Rosenbrock().value(genes.pheno());
-					F = Math.pow(x, a);
+					F = 1 / (Math.pow(x, a) + 1);
 					break;
 			}
 		
@@ -62,17 +62,16 @@ public class Individual{
 			switch(fitnessFunction) {
 			case "POLYNOMIAL":
 				x = new Rastrigin().value(genes.pheno());
-				F = x * a;
+				F = -x;
 				break;
 			
 			case "RATIO":
 				x = new Rastrigin().value(genes.pheno());
-				F = Math.pow(x, a);
+				F = 1 / (Math.pow(x, a) + 1);
 				break;
-		
 			}
 		}
-		
+		System.out.println("F " + F);
 		return F;
 	}
 	
@@ -144,7 +143,6 @@ public class Individual{
 			this.vals = vals;
 			this.xyVals = xyVals;
 		}
-		
 		
 		/** Returns a Point representing the expression of this set of Genes */
 		public Point pheno(){
