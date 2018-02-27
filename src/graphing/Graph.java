@@ -15,7 +15,7 @@ public class Graph extends Panel{
 	
 	/** Draw Graph */
 	@Override protected BufferedImage doUpdateImg(Graphics2D g, BufferedImage img) {
-		// TODO Auto-generated method stub
+		// TODO: Write Drawing Logic
 		return null;
 	}
 	

@@ -11,16 +11,19 @@ public class PSOAlgorithm implements OpAlgorithm{
 	/** Random Object which is used for all random operations in PSO */
 	private Random random = new Random();
 	
-	private double velocityC = 0.01;
-	private double pBestC = 0.02;
-	private double gBestC = 0.02;
-	
 	/** The Number of Particles this instance of the PSO uses */
 	private int numberOfParticles = 64;
 	/** The Max Number of Iterations this instance of the PSO will run */
 	private int maxNumberOfIterations = 128;
 	/** The Range from which the particles are spawned at (around 0|0) */
 	private double spawnRange = 128;
+	
+	/** Factor for last velocity in velocity calculation */
+	private double velocityC = 0.01;
+	/** Factor for pBest in Velocity calculation */
+	private double pBestC = 0.02;
+	/** Factor for gBest in Velocity calculation */
+	private double gBestC = 0.02;
 	
 	
 	/** Optimizes given Function */
