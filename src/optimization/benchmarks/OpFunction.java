@@ -41,7 +41,7 @@ public interface OpFunction{
 		}
 		/** Returns value at X|Y */
 		public double value(double x, double y){
-			double out = Math.pow((a - x), 2) + (b*Math.pow((y - Math.pow(y, 2)), 2));
+			double out = Math.pow((a - x), 2) + (b*Math.pow((y - Math.pow(x, 2)), 2));
 			return out;
 		}
 	}

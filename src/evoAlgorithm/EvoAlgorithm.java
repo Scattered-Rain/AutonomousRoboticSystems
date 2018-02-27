@@ -14,7 +14,7 @@ import java.util.Scanner;
 /** The Core class of the Evolutionary algorithm, where all the magic is supposed to happen. Sofia. */
 public class EvoAlgorithm {
 	public static final double PROPORTION_OF_POPULATION_TO_BE_SELECTED = 0.2;
-	public static final double PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS = 0.8;
+	public static final double PROPORTION_OF_POPULATION_TO_BE_COVERED_BY_OFFSPRINGS = 1-PROPORTION_OF_POPULATION_TO_BE_SELECTED;
 	public static String SELECTION_ALGORITHM = "PROPORTIONATE";
 	
 	@Getter private Random random = new Random();
@@ -32,7 +32,7 @@ public class EvoAlgorithm {
 		
 		List<Tuple<Individual, Double>> populationFitness = generateFitnessList(population);
 		Scanner reader = new Scanner(System.in);				
-		System.out.println("Pick a selection Method(options: PROPORTIONATE, RANK-BASED, TRUNCATED RANK-BASED, TOURNAMENT):");
+		System.out.println("Pick a selection Method(options: PROPORTIONATE, RANK-BASED, TRUNCATED RANK-BASED, TOURNAMENT, Elitist):");
 		String selection_option = reader.nextLine();
 		reader.close();
 		SELECTION_ALGORITHM = selection_option;
@@ -42,7 +42,7 @@ public class EvoAlgorithm {
 			populationFitness.clear();
 			populationFitness = generateFitnessList(selected_individuals);
 			System.out.println("==== ITERATION NO. " + String.valueOf(i+1) + " ====");
-			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(1).getA().getPoint());
+			System.out.println(populationFitness.get(0).getA().getPoint()+" : "+populationFitness.get(0).getB());
 		}
 		
 		return populationFitness.get(0).getA().getPoint();
@@ -78,8 +78,25 @@ public class EvoAlgorithm {
 			case "TOURNAMENT":
 				out = tournamentSelection(evaluatedPopulation);
 				break;
+				
+			case "Elitist":
+				out = elitistSelection(evaluatedPopulation);
+				break;
 		}
 		
+		return out;
+	}
+	
+	/** Simple Selecetion method to serve as reference */
+	private List<Individual> elitistSelection(List<Tuple<Individual, Double>> evaluatedPopulation){
+		List<Individual> out = new ArrayList<Individual>();
+		int winnerLoserCutoffIndex = (int)(evaluatedPopulation.size()*PROPORTION_OF_POPULATION_TO_BE_SELECTED);
+		for(int c=0; c<winnerLoserCutoffIndex; c++){
+			out.add(evaluatedPopulation.get(c).getA());
+		}
+		for(int c=winnerLoserCutoffIndex; c<evaluatedPopulation.size(); c++){
+			out.add(new Individual(out.get(random.nextInt(winnerLoserCutoffIndex)), out.get(random.nextInt(winnerLoserCutoffIndex))));
+		}
 		return out;
 	}
 	
@@ -402,7 +419,6 @@ public class EvoAlgorithm {
 		double minVal = Double.POSITIVE_INFINITY;
 		for(int c=0; c<population.size(); c++){
 			out.add(new Tuple<Individual, Double>(population.get(c), population.get(c).fitness()));
-
 			if(population.get(c).fitness() < minVal) {
 				minVal = population.get(c).fitness();
 			}
@@ -417,13 +433,11 @@ public class EvoAlgorithm {
 				}
 			}
 		}
-
 		for(int c=0; c<out.size(); c++) {
-			out.get(c).setB(out.get(c).getB()+Math.abs(minVal)+0.000001);
+			out.get(c).setB(out.get(c).getB()+Math.abs(0)+0.000001);
 		}
-		
-		System.out.println(out.get(0).getA().getPoint() + " " + (out.get(0).getB()));
-		System.out.println(out.get(out.size()-1).getA().getPoint() + " " + (out.get(out.size()-1).getB()));
+		System.out.println(minVal);
+		//System.exit(0);
 		return out;
 	}
 }

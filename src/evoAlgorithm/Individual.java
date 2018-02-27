@@ -38,40 +38,35 @@ public class Individual{
 	
 	/** Returns the fitness value of this Individual */
 	public double fitness(){
-		double a = 0.005;
 		String benchmarkFunction = BENCHMARK_FUNCTION;
 		String fitnessFunction = FITNESS_FUNCTION;
 		double x;
 		double F = 0.0;
-		
 		switch(benchmarkFunction) {
-		case "ROSENBROCK":
-			switch(fitnessFunction) {
-				case "POLYNOMIAL":
-					x = new Rosenbrock().value(genes.pheno());
-					F = -x;
+			case "ROSENBROCK":
+				switch(fitnessFunction) {
+					case "POLYNOMIAL":
+						x = new Rosenbrock().value(genes.pheno());
+						F = 1/Math.abs((x==0?Double.MIN_VALUE:x));
 					break;
-				
-				case "RATIO":
-					x = new Rosenbrock().value(genes.pheno());
-					F = 1 / (Math.pow(x, a) + 1);
-					break;
+//					case "RATIO":
+//						x = new Rosenbrock().value(genes.pheno());
+//						F = 1 / (Math.pow(x, a) + 1);
+//					break;
 			}
-		
-		case "RASTRIGIN":
-			switch(fitnessFunction) {
-			case "POLYNOMIAL":
-				x = new Rastrigin().value(genes.pheno());
-				F = -x;
-				break;
-			
-			case "RATIO":
-				x = new Rastrigin().value(genes.pheno());
-				F = 1 / (Math.pow(x, a) + 1);
-				break;
-			}
+			break;
+//			case "RASTRIGIN":
+//				switch(fitnessFunction) {
+//				case "POLYNOMIAL":
+//					x = new Rastrigin().value(genes.pheno());
+//					F = -x;
+//				break;
+//				case "RATIO":
+//					x = new Rastrigin().value(genes.pheno());
+//					F = 1 / (Math.pow(x, a) + 1);
+//				break;
+//			}
 		}
-		System.out.println("F " + F);
 		return F;
 	}
 	
@@ -86,7 +81,7 @@ public class Individual{
 		/** The length of the three arrays */
 		private static final int LENGTH = 128;
 		/** The likelyhood of mutation to occur per operation */
-		private static final double MUTATION_CHANCE_PER_OPERATION = 0.1/LENGTH;
+		private static final double MUTATION_CHANCE_PER_OPERATION = 0.9/LENGTH;
 		
 		
 		/** A List of raw Double values */
