@@ -6,14 +6,15 @@ import java.util.Random;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /** The Simulation Environment For da Bots */
 public class Simulator{
 	
-	/** Seed for the random Object */
-	private static final int RANDOM_SEED = 12011994;
-	/** Random Object for use throughout the Bot evolution */
-	@Getter private Random random = new Random(RANDOM_SEED);
+	/** Whether the Simulation Process is to be recorded */
+	@Setter private boolean recordSimulation = false;
+	/** List of all recorded Simulations */
+	@Getter private List<Recorder> simRecords = new ArrayList<Recorder>();
 	
 	
 	/** Simulates the bot controller, returns fitnessvalue */
