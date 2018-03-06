@@ -3,6 +3,8 @@ package debug;
 import evoAlgorithm.EvoAlgorithm;
 import optimization.benchmarks.OpFunction;
 import util.Point;
+import graphing.Graph;
+import graphing.GraphElement;
 
 public class DebugLaunch{
 	
@@ -12,5 +14,5 @@ public class DebugLaunch{
 		System.out.println(e.initEvolution());
 //		System.out.println(new OpFunction.Rosenbrock().value(new Point(0.00,0.00)));
 	}
-
+	
 }
