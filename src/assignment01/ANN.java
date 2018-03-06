@@ -57,7 +57,6 @@ public class ANN{
 		for (int i=0;i<2;i++){
 			for (int j=0;j<14;j++){
 				double randomValue = 0 + (1 - 0) * BotEvolution.getRandom().nextDouble();
-				System.out.println(randomValue);
 				weights_layer2[i][j]=randomValue;
 			}
 		}
