@@ -7,7 +7,7 @@ import lombok.Setter;
 public class Point{
 	
 	/** Epsilon value for comparions of float values */
-	private static final double EPSILON = 0.0001;
+	private static final double EPSILON = 0.00001;
 	
 	/** The x value this Point holds */
 	@Getter @Setter private double x;
@@ -22,9 +22,7 @@ public class Point{
 	
 	/** Adds given values to this Point */
 	public Point add(double x, double y){
-		this.x += x;
-		this.y += y;
-		return this;
+		return new Point(this.x+x, this.y+y);
 	}
 	
 	/** Adds given Point to this Point */
@@ -44,9 +42,7 @@ public class Point{
 	
 	/** Multiplies given values with this Point */
 	public Point multiply(double x, double y){
-		this.x = this.x*x;
-		this.y = this.y*y;
-		return this;
+		return new Point(this.x*x, this.y*y);
 	}
 	
 	/** Multiplies given Point with Point */
@@ -62,7 +58,7 @@ public class Point{
 	/** Normalizes this Point (x+y = 1) */
 	public Point normalize(){
 		if(x==0 && y==0){
-			return this;
+			return new Point(0, 0);
 		}
 		else{
 			int bx = x==0?0:(int)(Math.abs(x)/x);
@@ -70,9 +66,7 @@ public class Point{
 			double wx = Math.abs(x);
 			double wy = Math.abs(y);
 			double sum = wx+wy;
-			this.x = (wx/sum)*bx;
-			this.y = (wy/sum)*by;
-			return this;
+			return new Point((wx/sum)*bx, (wy/sum)*by);
 		}
 	}
 	
