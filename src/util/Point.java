@@ -6,18 +6,31 @@ import lombok.Setter;
 /** 2 Dimensional Double Object */
 public class Point{
 	
-	/** Epsilon value for comparions of float values */
-	private static final double EPSILON = 0.00001;
+	/** Epsilon value for comparisons of float values */
+	private static final double EPSILON = 0.0000001f;
+	
 	
 	/** The x value this Point holds */
-	@Getter @Setter private double x;
+	@Getter private double x;
 	/** The y value this Point holds */
-	@Getter @Setter private double y;
+	@Getter private double y;
+	
 	
 	/** Constructs new Point given the x|y */
 	public Point(double x, double y){
 		this.x = x;
 		this.y = y;
+		if(Math.abs(x)<EPSILON){
+			this.x = 0;
+		}
+		if(Math.abs(y)<EPSILON){
+			this.y = 0;
+		}
+	}
+	
+	/** Constructs new Point given an single XY */
+	public Point(double xy){
+		this(xy, xy);
 	}
 	
 	/** Adds given values to this Point */
@@ -66,7 +79,9 @@ public class Point{
 			double wx = Math.abs(x);
 			double wy = Math.abs(y);
 			double sum = wx+wy;
-			return new Point((wx/sum)*bx, (wy/sum)*by);
+			double nx = (wx/sum)*bx;
+			double ny = (wy/sum)*by;
+			return new Point(nx, ny);
 		}
 	}
 	
