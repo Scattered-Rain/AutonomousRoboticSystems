@@ -28,13 +28,25 @@ public class Simulator{
 	
 	/** Simulates the bot controller, returns fitnessvalue */
 	public double simulateFitness(ANN controller){
-		double out = 0;
+		double out = simulate(controller);
 		return out;
 	}
 	
-	/** Does the actual simulation step */
+	/** Does the actual simulation step (Right now this is a Debug method for testing) */
 	public double simulate(ANN controller){
+		double[] testGoals = new double[]{0.2, 0.8};
+		Random rand = new Random(1502);
 		double out = 0;
+		double[] sens = new double[12];
+		for(int c=0; c<sens.length; c++){
+			sens[c] = rand.nextDouble();
+		}
+		double[] mem = new double[2];
+		for(int c=0; c<mem.length; c++){
+			mem[c] = rand.nextDouble();
+		}
+		double[] outs = controller.process(sens, mem);
+		out = 2 - (Math.abs(testGoals[0]-outs[0]) + Math.abs(testGoals[1]-outs[1]));
 		return out;
 	}
 	
