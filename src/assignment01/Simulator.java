@@ -16,6 +16,15 @@ public class Simulator{
 	/** List of all recorded Simulations */
 	@Getter private List<Recorder> simRecords = new ArrayList<Recorder>();
 	
+	/** Reference to Bot Evolution */
+	private BotEvolution evo;
+	
+	
+	/** Constructs new Simulator */
+	public Simulator(BotEvolution evo){
+		this.evo = evo;
+	}
+	
 	
 	/** Simulates the bot controller, returns fitnessvalue */
 	public double simulateFitness(ANN controller){

@@ -80,7 +80,7 @@ public class ANN{
 	}
 	
 	
-	/** The answer to the question of where Babies come from. NSFW. motherGeneSelectionBias is the chance of genes of the mother to spread relative to the father. */
+	/** The answer to the question of where Babies come from. NSFW. motherGeneSelectionBias is the chance of genes of the mother to spread relative to the father. Assumes both ANNs have same architecture.*/
 	public static ANN crossoverAndMutation(ANN mother, ANN father, BotEvolution evo, double motherGeneSelectionBias, double chanceOfMutationPerGene){
 		double[][][] weights = new double[mother.weights.length][][];
 		for(int c=0; c<weights.length; c++){
@@ -88,7 +88,7 @@ public class ANN{
 			for(int c2=0; c2<layer.length; c2++){
 				for(int c3=0; c3<layer[0].length; c3++){
 					if(evo.getRandom().nextDouble()<chanceOfMutationPerGene){
-						//Let there be pure mutation!
+						//Let there be pure mutation! (For one gene)
 						weights[c][c2][c3] = evo.getRandom().nextDouble();
 					}
 					else{
