@@ -15,10 +15,10 @@ public class BotEvolution{
 	
 	/** Starts Evolutionary Process of bots, returns the best performing ANN once done */
 	public ANN initEvolution(){
-		final int INIT_POP = 100;
+		final int INIT_POP = 200;
 		final double ELITE_PERCENTILE = 0.08;
 		final double TRUNCATED_PERCENTILE = 0.05;
-		final double MUTATION_RATE = 0.05;
+		final double MUTATION_RATE = 0.005;
 		//Initialization
 		ANN[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
@@ -34,7 +34,7 @@ public class BotEvolution{
 			//index linked array of fitnesses of individauls in the current population
 			double[] fitnesses = new double[population.length];
 			for(int c=0; c<population.length; c++){
-				fitnesses[c] = sim.simulateFitness(population[c]);
+				fitnesses[c] = sim.simulateFitness(population[c], true);
 			}
 			//-Selection & Generation Step
 			ANN[] newPop = new ANN[population.length];
@@ -74,6 +74,8 @@ public class BotEvolution{
 			generations++;
 			//Optional Console Outs
 			System.out.println("Gen: "+(generations-1)+", Best Individual Fitness: "+repANNfit[0]+", Median Fit: "+repANNfit[1]+", Worst Fit: "+repANNfit[2]);
+			//System.out.println(sim.getSimRecords().get(sim.getSimRecords().size()-1));
+			//System.out.println();
 		}
 		System.out.println("Best Fitness: "+repANNfit[0]);
 		return repANNs[0];

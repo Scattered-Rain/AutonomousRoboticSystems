@@ -12,12 +12,13 @@ import lombok.Setter;
 /** The Simulation Environment For da Bots */
 public class Simulator{
 	
-	/** Whether the Simulation Process is to be recorded */
-	@Setter private boolean recordSimulation = false;
 	/** List of all recorded Simulations */
 	@Getter private List<Recorder> simRecords = new ArrayList<Recorder>();
 	/** Reference to Bot Evolution */
 	private BotEvolution evo;
+	
+	/** A Human Controller. When this variable is != null the Simulation is updating in meat time based on inputs given by the user via this object */
+	private HumanController humanController = null;
 	
 	
 	/** The Map in boolean dimension (where true=collision, false=walkable), map[y][x] */
@@ -48,12 +49,16 @@ public class Simulator{
 	
 	
 	/** Simulates the bot controller, returns fitnessvalue */
-	public double simulateFitness(ANN controller){
-		double out = simulateDebug(controller);
-		return out;
+	public double simulateFitness(ANN controller, boolean record){
+		int tests = 1;
+		double out = 0;
+		for(int c=0; c<tests; c++){
+			out += simulate(controller, evo.getRandom().nextInt(Integer.MAX_VALUE), record);
+		}
+		return out/tests;
 	}
 	
-	/** Does the actual simulation step (Right now this is a Debug method for testing) */
+	/** Does the actual simulation step (as a simple debug function to check that the evolution algorithm and ANN are working properly) */
 	public double simulateDebug(ANN controller){
 		double[] testGoals = new double[]{0.5, 0.5};
 		Random rand = new Random(1502);
@@ -68,11 +73,15 @@ public class Simulator{
 	}
 	
 	/** Simulates Robot */
-	public double simulate(ANN controller){
+	public double simulate(ANN controller, int randomSeed, boolean record){
 		final double sensorRange = 0.9;
-		final double speed = 0.8;
-		final int time = 1000;
-		Random rand = evo.getRandom();
+		final double speed = 0.7;
+		final int iterations = 100;
+		Random rand = new Random(666);//randomSeed);
+		Recorder rec = null;
+		if(record){
+			rec = new Recorder(map);
+		}
 		//Build dust map (false = not yet cleaned)
 		boolean[][] dust = new boolean[map.length][map[0].length];
 		//init bot as rotation and X|Y with chance of spawning anywhere without collision on map
@@ -87,16 +96,36 @@ public class Simulator{
 		//Simulate
 		double[] wheels = new double[2];
 		double[] sensorIns = new double[12];
-		for(int c=0; c<time; c++){
-			double inputAngleDifference = 1.0 / sensorIns.length;
+		for(int c=0; c<iterations; c++){
+			if(record){
+				rec.add(new Action(x, y, rota));
+			}
+			//If the Simulated bot is controlled by a human, only iterate if a new command has been sent, otherwise stall.
+			if(humanController!=null){
+				while(humanController.updated){
+					try{Thread.sleep(5);}catch(Exception ex){}
+				}
+			}
 			//calculate sensory inputs
+			double inputAngleDifference = 1.0 / sensorIns.length;
 			for(int inc=0; inc<sensorIns.length; inc++){
-				double seenAngle = (rota + inputAngleDifference*c) % 1;
-				double seenX = x + Math.cos(seenAngle)*sensorRange;
-				double seenY = y + Math.sin(seenAngle)*sensorRange;
-				if(map[(int)seenY][(int)seenX]){
+				double seenAngle = (rota + inputAngleDifference*inc) % 1.0;
+				double seenX = Math.cos(Math.toRadians(seenAngle*360))*sensorRange;
+				double seenY = Math.sin(Math.toRadians(seenAngle*360))*sensorRange;
+				if(map[(int)(y+seenY)][(int)(x+seenX)]){
 					//Collision is seen, calculate nearness of obstacle (directly on it=~1, very far away=~0)
-					//TODO add the math for this
+					//TODO improve this here code
+					double increments = 10.0;
+					double nearness = 1.0;
+					for(int igv=0; igv<increments; igv++){
+						if(map[(int)(y+seenY*nearness)][(int)(x+seenX*nearness)]){
+							nearness -= nearness/increments;
+						}
+						else{
+							sensorIns[inc] = 1.0-nearness;
+							break;
+						}
+					}
 					sensorIns[inc] = 1;
 				}
 				else{
@@ -108,8 +137,15 @@ public class Simulator{
 			double[] inputs = new double[sensorIns.length + wheels.length];
 			System.arraycopy(sensorIns, 0, inputs, 0, sensorIns.length);
 			System.arraycopy(wheels, 0, inputs, sensorIns.length, wheels.length);
-			wheels = controller.process(inputs);
-			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]*2)-1)*speed, ((wheels[1]*2)-1)*speed), new Point(x, y), rota);
+			if(humanController!=null){
+				//update wheels based on human interaction (For debugging purposes)
+				wheels = humanController.wheels;
+			}
+			else{
+				//update wheels the via ANN
+				wheels = controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//
+			}
+			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]))*speed, ((wheels[1]))*speed), new Point(x, y), rota);
 			rota = newPos[2];
 			double newX = newPos[0];
 			double newY = newPos[1];
@@ -119,16 +155,14 @@ public class Simulator{
 				double trajX = newX - x;
 				double trajY = newY - y;
 				//binary search legal location on trajectory (a bit of a cheat, but ehh)
-				double length = 0.5;
-				for(int chc=0; chc<5; chc++){
+				double length = 1.0;
+				int steps = 8;
+				for(int chc=0; chc<steps; chc++){
 					if(map[(int)(y+trajY*length)][(int)(x+trajX*length)]){
-						length -= 0.25*(chc+1);
-					}
-					else{
-						length += 0.25*(chc+1);
+						length -= 1.0/steps;
 					}
 				}
-				length = length<=0.07?0:length;
+				length = length<=0.001?0:length;
 				x = x + trajX*length;
 				y = y + trajY*length;
 			}
@@ -146,7 +180,20 @@ public class Simulator{
 				out += dust[c][c2]?1:0;
 			}
 		}
+		if(record){
+			this.simRecords.add(rec);
+		}
 		return out;
+	}
+	
+	/** Draws Map to the Console */
+	public void consoleOutMap(){
+		for(int cy=0; cy<map.length; cy++){
+			System.out.println();
+			for(int cx=0; cx<map[0].length; cx++){
+				System.out.print(map[cy][cx]?1:0);
+			}
+		}
 	}
 	
 	
@@ -166,6 +213,14 @@ public class Simulator{
 		public void add(Action action){
 			this.actions.add(action);
 		}
+		/** Returns String of the Record */
+		public String toString(){
+			StringBuffer buffer = new StringBuffer();
+			for(Action a:actions){
+				buffer.append(a+"\n");
+			}
+			return buffer.toString();
+		}
 	}
 	
 	/** Object Representing the result of an acion taken by the bot (i.e. movement and rotation) */
@@ -176,6 +231,17 @@ public class Simulator{
 		@Getter private double y;
 		/** The rotation of the bot, 0-1 range, where 0 points in up (0, -1) direction */
 		@Getter private double rotation;
+		public String toString(){
+			return "Point: "+x+"|"+y+", Angle: "+rotation;
+		}
+	}
+	
+	/** Utility Class for use when interacting with the Simulation from Meat Space */
+	public static class HumanController{
+		/** The values wheels is supposedto take */
+		@Getter private double[] wheels;
+		/** Boolean to check whether this input has already caused an input (to be manually set true once used in Simulation) */
+		@Getter @Setter private boolean updated;
 	}
 	
 }
