@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import graphing.Frame;
 import util.Point;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,13 +22,13 @@ public class Simulator{
 	
 	
 	/** The Map in boolean dimension (where true=collision, false=walkable), map[y][x] */
-	private boolean[][] map;
+	boolean[][] map;
 	
 	
 	/** Constructs new Simulator */
 	public Simulator(BotEvolution evo){
 		this.evo = evo;
-		setMap(new boolean[10][10]);
+		setMap(new boolean[8][8]);
 	}
 	
 	/** Modifies the given map to have outer edges, sets it to be the test map */
@@ -44,6 +45,7 @@ public class Simulator{
 			}
 		}
 		this.map = newMap;
+
 	}
 	
 	
@@ -151,10 +153,10 @@ public class Simulator{
 	
 	
 	//---inner classes---
-	/** Object keeping track of every action happeneing in the simulation */
+	/** Object keeping track of every action happening in the simulation */
 	public static class Recorder{
 		/** The Map used for the recorded Simulation */
-		@Getter boolean[][] map;
+		static @Getter boolean[][] map;
 		/** List of all Actions that have been taken by the Bot during the Simulation */
 		@Getter private List<Action> actions;
 		/** Constructs new empty Recorder based on Map */
@@ -168,7 +170,7 @@ public class Simulator{
 		}
 	}
 	
-	/** Object Representing the result of an acion taken by the bot (i.e. movement and rotation) */
+	/** Object Representing the result of an action taken by the bot (i.e. movement and rotation) */
 	@AllArgsConstructor public static class Action{
 		/** The x location of the bot */
 		@Getter private double x;
@@ -176,6 +178,7 @@ public class Simulator{
 		@Getter private double y;
 		/** The rotation of the bot, 0-1 range, where 0 points in up (0, -1) direction */
 		@Getter private double rotation;
+		
 	}
 	
 }

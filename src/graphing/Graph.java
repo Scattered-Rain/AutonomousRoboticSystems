@@ -6,25 +6,27 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import assignment01.Simulator.Recorder;
+
 /** Builds and renders graphing things */
-public class Graph extends Panel{
+public class Graph extends Frame{
 	
 	/** The Elements the Graph is drawing */
 	private List<GraphElement> elements;
 	
 	
 	/** Constructs new Graph */
-	public Graph(int width, int height){
-		super(width, height, width, height, "Graph");
+	public Graph(int width, int height,int angle,Recorder rec){
+		super(width, height, angle, rec);
 		this.elements = new ArrayList<GraphElement>();
-		super.updateImg();
+		//super.updateImg();
 	}
 	
 	/** Constructs new Graph */
-	public Graph(int width, int height, List<GraphElement> elements){
-		super(width, height, width, height, "Graph");
+	public Graph(int width, int height,int angle,Recorder rec, List<GraphElement> elements){
+		super(width, height, angle,rec );
 		this.elements = elements;
-		super.updateImg();
+		//super.updateImg();
 	}
 	
 	

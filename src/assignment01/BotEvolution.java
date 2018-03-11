@@ -2,6 +2,9 @@ package assignment01;
 
 import java.util.Random;
 
+import assignment01.Simulator.Action;
+import assignment01.Simulator.Recorder;
+import graphing.Frame;
 import lombok.Getter;
 
 /** Evolutionary Algorithm to evolve cleaning Bots */
@@ -23,6 +26,7 @@ public class BotEvolution{
 		ANN[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
 		Simulator sim = new Simulator(this);
+		Recorder reec = new Recorder(sim.map);
 		ANN[] population = new ANN[INIT_POP];
 		for(int c=0; c<population.length; c++){
 			population[c] = new ANN(this);
@@ -73,9 +77,12 @@ public class BotEvolution{
 			//-Post Generation Processing Housekeeping
 			generations++;
 			//Optional Console Outs
-			System.out.println("Gen: "+(generations-1)+", Best Individual Fitness: "+repANNfit[0]+", Median Fit: "+repANNfit[1]+", Worst Fit: "+repANNfit[2]);
+			//System.out.println("Gen: "+(generations-1)+", Best Individual Fitness: "+repANNfit[0]+", Median Fit: "+repANNfit[1]+", Worst Fit: "+repANNfit[2]);
 		}
-		System.out.println("Best Fitness: "+repANNfit[0]);
+		//System.out.println("Best Fitness: "+repANNfit[0]);
+		Frame frm = new Frame(70,70,0,reec);
+		Action act = new Simulator.Action(5.0,5.0,0.5);
+		frm.update(act);
 		return repANNs[0];
 	}
 	
