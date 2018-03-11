@@ -15,7 +15,7 @@ public class Kinematics {
 	 * @param initial_theta - The initial angle
 	 * @return - The new position of the robot in the form [new_x, new_y, new_theta]
 	 */
-	public double[] calculatePosition(Point velocity, Point coordinates, double initial_theta) {
+	public static double[] calculatePosition(Point velocity, Point coordinates, double initial_theta) {
 		if (velocity.getX() == velocity.getY()) {
 			return moveLinearly(velocity, coordinates, initial_theta);
 		}
@@ -33,7 +33,7 @@ public class Kinematics {
 	 * @param initial_theta - The initial angle
 	 * @return - The new position of the robot in the form [new_x, new_y, new_theta]
 	 */
-	public double[] moveLinearly(Point velocity, Point coordinates, double initial_theta) {
+	private static double[] moveLinearly(Point velocity, Point coordinates, double initial_theta) {
 		double left_velocity = velocity.getX();
 		double right_velocity = velocity.getY();
 		double total_velocity = (left_velocity + right_velocity)/2;
@@ -55,7 +55,7 @@ public class Kinematics {
 	 * @param initial_theta - The initial angle
 	 * @return - The new position of the robot in the form [new_x, new_y, new_theta]
 	 */
-	public double[] move(Point velocity, Point coordinates, double initial_theta) {
+	private static double[] move(Point velocity, Point coordinates, double initial_theta) {
 		double initial_x = coordinates.getX();
 		double initial_y = coordinates.getY();
 		double left_velocity = velocity.getX();

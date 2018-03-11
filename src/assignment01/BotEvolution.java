@@ -15,9 +15,10 @@ public class BotEvolution{
 	
 	/** Starts Evolutionary Process of bots, returns the best performing ANN once done */
 	public ANN initEvolution(){
-		final int INIT_POP = 1000;
-		final double ELITE_PERCENTILE = 0.2;
-		final double TRUNCATED_PERCENTILE = 0.1;
+		final int INIT_POP = 100;
+		final double ELITE_PERCENTILE = 0.08;
+		final double TRUNCATED_PERCENTILE = 0.05;
+		final double MUTATION_RATE = 0.05;
 		//Initialization
 		ANN[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
@@ -42,9 +43,9 @@ public class BotEvolution{
 				for(int c2=c+1; c2<population.length; c2++){
 					if(fitnesses[c2] > fitnesses[c]){
 						double helpF = fitnesses[c];
-						ANN helpA = population[c];
 						fitnesses[c] = fitnesses[c2];
 						fitnesses[c2] = helpF;
+						ANN helpA = population[c];
 						population[c] = population[c2];
 						population[c2] = helpA;
 					}
@@ -62,7 +63,7 @@ public class BotEvolution{
 					parents[c2] = random.nextInt((int)(population.length - population.length*TRUNCATED_PERCENTILE));
 				}
 				//Make a Baby (This method is NSFW)
-				newPop[c] = ANN.crossoverAndMutation(population[parents[0]], population[parents[1]], this, 0.5, 0.1);
+				newPop[c] = ANN.crossoverAndMutation(population[parents[0]], population[parents[1]], this, 0.8, MUTATION_RATE);
 			}
 			//Keep track of last generations best/med/worst ANN
 			repANNs = new ANN[]{population[0], population[population.length/2], population[population.length-1]};

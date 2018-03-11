@@ -21,7 +21,7 @@ public class EvoAlgorithm {
 	
 	/** The actual method containing the Evolutionary Algorithm, return type should correspond to whatever the algorithm optimizes */
 	public Point initEvolution(){
-		int  number_of_individuals = 1000;
+		int  number_of_individuals = 10000;
 		List population = new ArrayList();
 		
 		//initialisation of number_of_individuals individuals

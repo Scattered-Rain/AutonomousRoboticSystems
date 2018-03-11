@@ -8,7 +8,7 @@ import java.util.Random;
 public class ANN{
 	
 	/** Array that represents the number of nodes that can be found in each layer. index 0=input, index length-1=out, hence length represents number of layers */
-	private static final int[] NODES_PER_LAYER = new int[]{14, 14, 2};
+	private static final int[] NODES_PER_LAYER = new int[]{12+2, 14, 2};
 	
 	/** Reference to the BotEvolution Class */
 	private BotEvolution evo;
@@ -33,7 +33,7 @@ public class ANN{
 	
 	
 	/** Processes the sensor input given to it by the environment (sensorInput.length = 12) and returns the movement speed of the wheels (out.length = 2, where index 0 is left and 1 is right) */
-	public double[] process(double[] sensorInput, double[] movement){
+	public double[] process(double[] input){
 		double[] sum = new double[2];
 		double[] sum_layer1 = new double[14];
 		double[] out = new double[]{0,0};
@@ -41,24 +41,22 @@ public class ANN{
 		double[][] weights_layer1 = weights[0];//initialisation_layer1();
 		double[][] weights_layer2 = weights[1];//initialisation_layer2();
 
-		double[] input = new double[sensorInput.length + movement.length];
-		System.arraycopy(sensorInput, 0, input, 0, sensorInput.length);
-		System.arraycopy(movement, 0, input, sensorInput.length, movement.length);
-		
-		//System.out.println(Arrays.deepToString(weights_layer2));
+//		double[] input = new double[sensorInput.length + movement.length];
+//		System.arraycopy(sensorInput, 0, input, 0, sensorInput.length);
+//		System.arraycopy(movement, 0, input, sensorInput.length, movement.length);
 		
 		for (int i=0;i<sum_layer1.length;i++){
 			for (int j=0;j<input.length;j++){
 				sum_layer1[i] += input[j]*weights_layer1[i][j];
 			}
-			sum_layer1[i] += 1.0;
+			sum_layer1[i] += 1.0*weights_layer1[i][weights_layer1[i].length-1];
 			sum_layer1[i] = 1/(1+ Math.exp(-sum_layer1[i]));
 		}
 		for (int i=0;i<2;i++){
 			for (int j=0;j<sum_layer1.length;j++){
 				sum[i] += sum_layer1[j]*weights_layer2[i][j];
 			}
-			sum[i]+=1;
+			sum[i] += 1.0*weights_layer2[i][weights_layer2[i].length-1];
 			out[i] = 1/(1+ Math.exp(-sum[i]));
 		}
 		//System.out.println(Arrays.toString(out));
@@ -68,7 +66,7 @@ public class ANN{
 	
 	/** Randomly initializes the weights of the layer of the given index, corresponding to the number of connections to and connections from given. Returns initialized layer.*/
 	public double[][] initLayer(int layer, int numberToNodes, int numberFromNodes){
-		double[][] layerWeights = new double[numberFromNodes][numberToNodes];
+		double[][] layerWeights = new double[numberFromNodes+1][numberToNodes];
 		for (int i=0;i<layerWeights.length;i++){
 			for (int j=0;j<layerWeights[i].length;j++){
 				double randomValue = 0 + (1) * evo.getRandom().nextDouble();
@@ -88,9 +86,17 @@ public class ANN{
 			for(int c2=0; c2<weights[c].length; c2++){
 				weights[c][c2] = new double[mother.weights[c][0].length];
 				for(int c3=0; c3<weights[c][0].length; c3++){
-					if(evo.getRandom().nextDouble()<chanceOfMutationPerGene){
+					if(evo.getRandom().nextDouble()<chanceOfMutationPerGene/8){
 						//Let there be pure mutation! (For one gene)
 						weights[c][c2][c3] = evo.getRandom().nextDouble();
+					}
+					else if(evo.getRandom().nextDouble()<chanceOfMutationPerGene){
+						//Let there be more mutation! (For one gene)
+						weights[c][c2][c3] = evo.getRandom().nextDouble();
+						int d0 = evo.getRandom().nextInt(mother.weights.length);
+						int d1 = evo.getRandom().nextInt(mother.weights[d0].length);
+						int d2 = evo.getRandom().nextInt(mother.weights[d0][d1].length);
+						weights[c][c2][c3] = evo.getRandom().nextDouble()<motherGeneSelectionBias?mother.weights[d0][d1][d2]:father.weights[d0][d1][d2];
 					}
 					else{
 						//Crossover & Creation
