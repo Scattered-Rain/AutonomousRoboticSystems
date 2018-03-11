@@ -153,11 +153,14 @@ public class Simulator{
 	//---inner classes---
 	/** Object keeping track of every action happeneing in the simulation */
 	public static class Recorder{
+		/** The Map used for the recorded Simulation */
+		@Getter boolean[][] map;
 		/** List of all Actions that have been taken by the Bot during the Simulation */
 		@Getter private List<Action> actions;
-		/** Constructs new empty Recorder */
-		public Recorder(){
+		/** Constructs new empty Recorder based on Map */
+		public Recorder(boolean[][] map){
 			this.actions = new ArrayList<Action>();
+			this.map = map;
 		}
 		/** Adds an Action to the List of Actions */
 		public void add(Action action){
