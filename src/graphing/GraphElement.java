@@ -8,7 +8,7 @@ import optimization.benchmarks.OpFunction;
 import util.Point;
 import lombok.AllArgsConstructor;
 
-/** Abstract class designed to graph some element on usingthe Graph class */
+/** Abstract class designed to graph some element on using the Graph class */
 public abstract class GraphElement{
 	
 	/** Draws Itslef */

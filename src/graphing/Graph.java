@@ -14,14 +14,14 @@ public class Graph extends Frame{
 	
 	
 	/** Constructs new Graph */
-	public Graph(int width, int height){
-		super(width, height);
+	public Graph(int width, int height, int angle){
+		super(width, height, angle);
 		this.elements = new ArrayList<GraphElement>();
 	}
 	
 	/** Constructs new Graph */
-	public Graph(int width, int height, List<GraphElement> elements){
-		super(width, height);
+	public Graph(int width, int height, int angle,  List<GraphElement> elements){
+		super(width, height, angle);
 		this.elements = elements;
 	}
 	

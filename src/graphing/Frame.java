@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,6 +32,8 @@ public class Frame extends JFrame{
 		
     int x = 10;
     int y = 10;
+    int velx =0, vely =0;
+    int angle_ = 0;
 
 
     private static final int D_W = 600;
@@ -38,7 +41,7 @@ public class Frame extends JFrame{
 
     Panel drawPanel = new Panel();
 
-    public Frame(double x1, double y1) {
+    public Frame(double width, double height, int angle) {
         ActionListener listener = new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 if (x >= D_W) {
@@ -47,34 +50,37 @@ public class Frame extends JFrame{
                 } else {
                 	int randomx = ThreadLocalRandom.current().nextInt(-1, 10 + 1);
                     //System.out.println(randomx);
-                	x += x1;
+                	x += width;
+                	angle_ += angle;
                     drawPanel.repaint();
                 }
                 
-                if (y1 >= D_H) {
+                if (y >= D_H) {
                     y = 10;
                     drawPanel.repaint();
                 } else {
                 	int randomy = ThreadLocalRandom.current().nextInt(-1, 10 + 1);
-                    y += y1;
+                    y += height;
                     drawPanel.repaint();
                 }
             }
         };
-        Timer timer = new Timer(100, listener);
+        Timer timer = new Timer(1000, listener);
         timer.start();
         add(drawPanel);
-
+        
         pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
     }
     
-    
+	
 
-    private class Panel extends JPanel {
+    private class Panel extends JPanel implements ActionListener, KeyListener{
 
+    	Timer t = new Timer(5, this);
+    	
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             //public void drawRect(int x, int y, int width, int height): draw
@@ -84,13 +90,85 @@ public class Frame extends JFrame{
             g.fillRect(590, 0, 10, 400); //ka8eth de3ia
             g.fillRect(300, 50, 10, 100);
             g.fillRect(50, 300, 100, 10);
-            g.setColor(Color.GREEN);
-            g.fillArc(x, y, 70,70,0,359);  
+            g.setColor(Color.BLACK);
+            g.fillArc(x, y, 70,70,angle_,350);  
         }
 
         public Dimension getPreferredSize() {
             return new Dimension(D_W, D_H);
         }
+        
+        public Panel(){
+        	t.start();
+        	addKeyListener(this);
+        	setFocusable(true);
+    		setFocusTraversalKeysEnabled(false);
+        	}
+
+        public void keyPressed(KeyEvent e) {
+    		int code = e.getKeyCode();
+    		
+    		if (code == KeyEvent.VK_DOWN){
+    			vely = 1;
+    			velx = 0;
+    		}
+    		if (code == KeyEvent.VK_UP){
+    			vely = -1;
+    			velx = 0;
+    		}
+    		if (code == KeyEvent.VK_LEFT){
+    			vely = 0;
+    			velx = -1;
+    		}
+    		if (code == KeyEvent.VK_RIGHT){
+    			vely = 0;
+    			velx = 1;
+    			
+    		}
+    		x+=velx;
+    		y+=vely;
+    	}
+    	
+    	
+    	
+    	public void keyTyped(KeyEvent e) {}
+    	public void keyReleased(KeyEvent e) {
+    		velx=0;
+    		vely=0;
+    	}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			if(x < 0)
+			{
+				velx=0;
+				x = 0;		
+			}
+			
+			if(x > 530)
+			{
+				velx=0;
+				x = 530;		
+			}
+			
+			if(y < 0)
+			{
+				vely=0;
+				y = 0;		
+			}
+			
+			if(y > 330)
+			{
+				vely=0;
+				y = 330;		
+			}
+			
+			
+			x += velx;
+			y += vely;
+			repaint();
+			
+		}
     }
 
 }

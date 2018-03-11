@@ -21,12 +21,9 @@ public class DebugLaunch{
 		double[] aaa = {11.5,11.5};
 		double[] output;
 		output = e.process( aahdshfs, aaa);
-
-	        EventQueue.invokeLater(new Runnable() {
-	            public void run() {
-	                new Frame(output[0],output[1]);
-	            }
-	        });
+		int angle = 0;
+		angle =90;
+        new Frame(output[0]*10,output[1]*10,angle);
 		//System.out.println(Arrays.toString(output));
 //		System.out.println(new OpFunction.Rosenbrock().value(new Point(0.00,0.00)));
 	}
