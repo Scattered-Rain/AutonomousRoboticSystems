@@ -79,8 +79,8 @@ public class Simulator{
 	public double simulate(ANN20 controller, int randomSeed, boolean record){
 		final double sensorRange = 0.9;
 		final double speed = 0.9;
-		final int iterations = 500;
-		randomSeed = 12011994;//TODO: Debug, plox remove, thankz
+		final int iterations = map.length*map[0].length;
+		//randomSeed = 12011994;//TODO: Debug, plox remove, thankz
 		Random rand = new Random(randomSeed);
 		controller.setSimSeed(randomSeed);
 		Recorder rec = null;
@@ -145,7 +145,7 @@ public class Simulator{
 					sensorIns[inc] = 0;
 				}
 				//Dust Sensors
-				dustSensor[inc] = !dust[(int)(y+seenY)][(int)(x+seenX)]?1:0;
+				dustSensor[inc] = !dust[(int)(y+seenY)][(int)(x+seenX)]&&!map[(int)(y+seenY)][(int)(x+seenX)]?1:0;
 			}
 			//get Controller out
 			double[] inputs = new double[sensorIns.length + wheels.length + dustSensor.length];
@@ -165,7 +165,7 @@ public class Simulator{
 			}
 			else{
 				//update wheels the via ANN
-				wheels = new double[]{rand.nextDouble(), rand.nextDouble()};//controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//
+				wheels = controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//new double[]{rand.nextDouble(), rand.nextDouble()};//
 			}
 			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]*2-1))*speed, ((wheels[1]*2-1))*speed), new Point(x, y), rota);
 			rota = newPos[2]<0?Math.abs(1-(Math.abs(newPos[2]%1))):newPos[2]%1;
