@@ -22,13 +22,13 @@ public class EvoAlgorithm {
 	 * 
 	 * @param selection - A string that determines which algorithm will be used for the Selection process
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] selection(String selection, BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] selection(String selection, BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
-		ANN[] out = new ANN[numberofIndivuduals];
+		ANN20[] out = new ANN20[numberofIndivuduals];
 		
 		switch(selection) {
 			case "ELITIST":
@@ -61,16 +61,16 @@ public class EvoAlgorithm {
 	 * the population and are used for reproduction.
 	 * 
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] elitistSelection(BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] elitistSelection(BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
 		int numberOfOffspringsToBeGenerated = numberofIndivuduals - numberOfSelectionsToBeMade;
-		ANN[] selectedIndividuals = new ANN[numberOfSelectionsToBeMade];
-		Tuple<ANN[], double[]> rankedIndividuals = EvoAlgorithm.rankIndividuals(population, fitnesses);
+		ANN20[] selectedIndividuals = new ANN20[numberOfSelectionsToBeMade];
+		Tuple<ANN20[], double[]> rankedIndividuals = EvoAlgorithm.rankIndividuals(population, fitnesses);
 		population = rankedIndividuals.getA();
 		fitnesses = EvoAlgorithm.rankIndividuals(population, fitnesses).getB();
 		
@@ -79,8 +79,8 @@ public class EvoAlgorithm {
 			selectedIndividuals[c] = population[c];
 		}
 				
-		ANN[] newGeneration = makeOffsprings(botEvolution, population, numberOfOffspringsToBeGenerated);
-		ANN[] newPop = new ANN[numberofIndivuduals];
+		ANN20[] newGeneration = makeOffsprings(botEvolution, population, numberOfOffspringsToBeGenerated);
+		ANN20[] newPop = new ANN20[numberofIndivuduals];
 		System.arraycopy(selectedIndividuals, 0, newPop, 0, selectedIndividuals.length);
 		System.arraycopy(newGeneration, 0, newPop, selectedIndividuals.length, newGeneration.length);
 		return newPop;
@@ -94,11 +94,11 @@ public class EvoAlgorithm {
 	 * selected individuals and the new generation.
 	 * 
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] proportionateSelection(BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] proportionateSelection(BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
 		int numberOfOffspringsToBeGenerated = numberofIndivuduals - numberOfSelectionsToBeMade;
@@ -111,9 +111,9 @@ public class EvoAlgorithm {
 			proportionsPerIndividual[i] = proportion;
 		}
 		
-		ANN[] selectedIndividuals = useRouletteWheel(population, proportionsPerIndividual);
-		ANN[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
-		ANN[] newPop = new ANN[numberofIndivuduals];
+		ANN20[] selectedIndividuals = useRouletteWheel(population, proportionsPerIndividual);
+		ANN20[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
+		ANN20[] newPop = new ANN20[numberofIndivuduals];
 		System.arraycopy(selectedIndividuals, 0, newPop, 0, selectedIndividuals.length);
 		System.arraycopy(newGeneration, 0, newPop, selectedIndividuals.length, newGeneration.length);
 		return newPop;
@@ -128,15 +128,15 @@ public class EvoAlgorithm {
 	 * generation.
 	 * 
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] rankBasedSelection(BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] rankBasedSelection(BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
 		int numberOfOffspringsToBeGenerated = numberofIndivuduals - numberOfSelectionsToBeMade;
-		ANN[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
+		ANN20[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
 		int sumOfRanks = calculateSumOfRanks(rankedIndividuals);
 		double[] proportionsPerIndividual = new double[numberofIndivuduals];
 
@@ -146,9 +146,9 @@ public class EvoAlgorithm {
 			proportionsPerIndividual[i] = proportion;
 		}
 		
-		ANN[] selectedIndividuals = useRouletteWheel(population, proportionsPerIndividual);
-		ANN[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
-		ANN[] newPop = new ANN[numberOfSelectionsToBeMade + numberOfOffspringsToBeGenerated];
+		ANN20[] selectedIndividuals = useRouletteWheel(population, proportionsPerIndividual);
+		ANN20[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
+		ANN20[] newPop = new ANN20[numberOfSelectionsToBeMade + numberOfOffspringsToBeGenerated];
 		System.arraycopy(selectedIndividuals, 0, newPop, 0, selectedIndividuals.length);
 		System.arraycopy(newGeneration, 0, newPop, selectedIndividuals.length, newGeneration.length);
 		return newPop;
@@ -162,18 +162,18 @@ public class EvoAlgorithm {
 	 * of the population is consisted of only the previously selected individuals and the new generation.
 	 * 
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] truncatedRankBasedSelection(BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] truncatedRankBasedSelection(BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
 		int numberOfOffspringsToBeGenerated = numberofIndivuduals - numberOfSelectionsToBeMade;
-		ANN[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
-		ANN[] selectedIndividuals = Arrays.copyOfRange(rankedIndividuals, 0, numberOfSelectionsToBeMade);
-		ANN[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
-		ANN[] newPop = new ANN[numberofIndivuduals];
+		ANN20[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
+		ANN20[] selectedIndividuals = Arrays.copyOfRange(rankedIndividuals, 0, numberOfSelectionsToBeMade);
+		ANN20[] newGeneration = makeOffsprings(botEvolution, selectedIndividuals, numberOfOffspringsToBeGenerated);
+		ANN20[] newPop = new ANN20[numberofIndivuduals];
 		System.arraycopy(selectedIndividuals, 0, newPop, 0, selectedIndividuals.length);
 		System.arraycopy(newGeneration, 0, newPop, selectedIndividuals.length, newGeneration.length);
 		return newPop;
@@ -187,19 +187,19 @@ public class EvoAlgorithm {
 	 * individuals that is selected in each round.
 	 * 
 	 * @param botEvolution - An object that denotes the current Bot Evolution session
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals
 	 * @return - The new version of the population
 	 */
-	public ANN[] tournamentSelection(BotEvolution botEvolution, ANN[] population, double[] fitnesses){
+	public ANN20[] tournamentSelection(BotEvolution botEvolution, ANN20[] population, double[] fitnesses){
 		int numberofIndivuduals = population.length;
-		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
+		int numberOfSelectionsToBeMade = (int)(7);//numberofIndivuduals * ELITE_PERCENTILE);
 		int numberOfOffspringsToBeGenerated = (int)Math.round(numberofIndivuduals * POPULATION_PROPORTION_TO_BE_COVERED_BY_OFFSPRINGS);
-		ANN[] newGeneration = new ANN[numberOfOffspringsToBeGenerated];
+		ANN20[] newGeneration = new ANN20[numberOfOffspringsToBeGenerated];
 		
 		for (int i = 0; i < numberOfOffspringsToBeGenerated; i++) {
 			List<Integer> drawnIndividuals = new ArrayList<Integer>();
-			ANN[] winningIndividuals = new ANN[numberOfOffspringsToBeGenerated * 2];
+			ANN20[] winningIndividuals = new ANN20[numberOfOffspringsToBeGenerated * 2];
 			double[] winningIndividualsFitnesses = new double[numberOfOffspringsToBeGenerated *2];
 			
 			for (int j = 0; j < numberOfSelectionsToBeMade; j++) {
@@ -214,14 +214,14 @@ public class EvoAlgorithm {
 				winningIndividualsFitnesses[j] = fitnesses[indexOfWinningIndividual];
 			}
 			
-			ANN[] rankedIndividuals = rankIndividuals(winningIndividuals, winningIndividualsFitnesses).getA();
-			ANN[] selectedIndividuals = Arrays.copyOfRange(rankedIndividuals, 0, 2);
-			ANN offspring = makeOffsprings(botEvolution, selectedIndividuals, 1)[0];
+			ANN20[] rankedIndividuals = rankIndividuals(winningIndividuals, winningIndividualsFitnesses).getA();
+			ANN20[] selectedIndividuals = Arrays.copyOfRange(rankedIndividuals, 0, 2);
+			ANN20 offspring = makeOffsprings(botEvolution, selectedIndividuals, 1)[0];
 			newGeneration[i] = offspring;
 		}
 		
-		ANN[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
-		ANN[] newPop = new ANN[numberofIndivuduals];
+		ANN20[] rankedIndividuals = rankIndividuals(population, fitnesses).getA();
+		ANN20[] newPop = new ANN20[numberofIndivuduals];
 		System.arraycopy(rankedIndividuals, 0, newPop, 0, rankedIndividuals.length - numberOfOffspringsToBeGenerated);
 		System.arraycopy(newGeneration, 0, newPop, rankedIndividuals.length - numberOfOffspringsToBeGenerated, newGeneration.length);
 		return newPop;
@@ -261,16 +261,16 @@ public class EvoAlgorithm {
 	 * whom this slice belongs is identified and in case it is not already drawn in a previous spin, it is added to the list of 
 	 * selected individuals. If it has already been drawn, a new spin is performed until a new individual is selected.
 	 * 
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param proportionsPerIndividual - An array with the proportions that were assigned to each individual
 	 * @return - An array with the selected individuals that will be used for reproduction
 	 */
-	private ANN[] useRouletteWheel(ANN[] population, double[] proportionsPerIndividual) {
+	private ANN20[] useRouletteWheel(ANN20[] population, double[] proportionsPerIndividual) {
 		double[] rouletteWheel = buildRouletteWheel(proportionsPerIndividual);
 		int numberofIndivuduals = proportionsPerIndividual.length;
 		int numberOfSelectionsToBeMade = (int)Math.round(numberofIndivuduals * ELITE_PERCENTILE);
 		List<Integer> selectedIndividualsIndexes = new ArrayList<Integer>();
-		ANN[] selectedIndividuals = new ANN[numberOfSelectionsToBeMade];
+		ANN20[] selectedIndividuals = new ANN20[numberOfSelectionsToBeMade];
 		
 		for (int i = 0; i < numberOfSelectionsToBeMade; i++) {
 			double selectedNumber = random.nextDouble();
@@ -333,10 +333,10 @@ public class EvoAlgorithm {
 	/**
 	 * This method calculates the sum of the ranks given a list of ranked individuals.
 	 * 
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @return - The sum of the ranks for the given list of ranked individuals
 	 */
-	private int calculateSumOfRanks(ANN[] rankedIndividuals) {
+	private int calculateSumOfRanks(ANN20[] rankedIndividuals) {
 		int sumOfRanks = 0;
 		
 		for (int i = 0; i < rankedIndividuals.length; i++) {
@@ -350,25 +350,25 @@ public class EvoAlgorithm {
 	 * This method ranks the population with respect to their fitness value in decreasing order.
 	 * The index linking between the population and their fitness values is preserved.
 	 * 
-	 * @param population - An array of ANNs that correspond to the different individuals
+	 * @param population - An array of ANN20s that correspond to the different individuals
 	 * @param fitnesses - An array with the fitness values of the different individuals	 
 	 * @return - A tuple with the sorted versions of the two aforementioned arrays.
 	 */
-	public static Tuple<ANN[], double[]> rankIndividuals(ANN[] population, double[] fitnesses) {
+	public static Tuple<ANN20[], double[]> rankIndividuals(ANN20[] population, double[] fitnesses) {
 		for(int c=0; c<population.length; c++){
 			for(int c2=c+1; c2<population.length; c2++){
 				if(fitnesses[c2] > fitnesses[c]){
 					double helpF = fitnesses[c];
 					fitnesses[c] = fitnesses[c2];
 					fitnesses[c2] = helpF;
-					ANN helpA = population[c];
+					ANN20 helpA = population[c];
 					population[c] = population[c2];
 					population[c2] = helpA;
 				}
 			}
 		}
 		
-		return new Tuple<ANN[], double[]>(population, fitnesses);
+		return new Tuple<ANN20[], double[]>(population, fitnesses);
 	}
 	
 	/**
@@ -380,8 +380,8 @@ public class EvoAlgorithm {
 	 * @param numberOfOffspringsToBeCreated - The amount of offsprings to be created
 	 * @return - The produced offsprings
 	 */
-	private ANN[] makeOffsprings(BotEvolution botEvolution, ANN[] selectedIndividuals, int numberOfOffspringsToBeCreated) {
-		ANN[] newPop = new ANN[numberOfOffspringsToBeCreated];
+	private ANN20[] makeOffsprings(BotEvolution botEvolution, ANN20[] selectedIndividuals, int numberOfOffspringsToBeCreated) {
+		ANN20[] newPop = new ANN20[numberOfOffspringsToBeCreated];
 		
 		for(int c = 0; c < numberOfOffspringsToBeCreated; c++){
 			//Select mother and father
@@ -393,7 +393,7 @@ public class EvoAlgorithm {
 			}
 			
 			//Make a Baby (This method is NSFW)
-			newPop[c] = ANN.crossoverAndMutation(selectedIndividuals[indexOfMother], selectedIndividuals[indexOfFather], botEvolution, 0.8, MUTATION_RATE);
+			newPop[c] = ANN20.crossoverAndMutation(selectedIndividuals[indexOfMother], selectedIndividuals[indexOfFather], botEvolution, 0.8, MUTATION_RATE);
 		}
 		
 		return newPop;
