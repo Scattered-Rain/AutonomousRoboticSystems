@@ -37,6 +37,9 @@ public class Frame extends JFrame{
 	 *  Will, When Printed, Automatically Be Scaled To Fit The Frame. */
 	private BufferedImage bufferImage;
 		
+	int SCALE = 20;
+	
+	
     int x;
     int y;
     int velx =0, vely =0;
@@ -56,14 +59,14 @@ public class Frame extends JFrame{
     
     public void init(Recorder rec){
     	MAP = rec.getMap();
-    	D_H = MAP.length*70;
-    	D_W = MAP[0].length*70;
+    	D_H = MAP.length*SCALE;
+    	D_W = MAP[0].length*SCALE;
     	this.DUST = new boolean[MAP.length][MAP[0].length];
     }
     
     public void update(Action act){
-    	this.x = (int) (act.getX()*70-25);
-    	this.y = (int) (act.getY()*70-25);
+    	this.x = (int) (act.getX()*SCALE-(SCALE/2/2));
+    	this.y = (int) (act.getY()*SCALE-(SCALE/2/2));
     	this.angle_ = (int) (act.getRotation()*360);
     	DUST[(int)act.getY()][(int)act.getX()] = true;
     	this.lastAction = act;
@@ -81,8 +84,8 @@ public class Frame extends JFrame{
     	Panel drawPanel = new Panel();
         ActionListener listener = new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (x >= D_W-1.6*70) {
-                    x = 70;
+                if (x >= D_W-1.6*SCALE) {
+                    x = SCALE;
                     drawPanel.repaint();
                 } else {
 //                	x = width;
@@ -90,8 +93,8 @@ public class Frame extends JFrame{
                     drawPanel.repaint();
                 }
                 
-                if (y >= D_H-1.6*70) {
-                    y = 70;
+                if (y >= D_H-1.6*SCALE) {
+                    y = SCALE;
                     drawPanel.repaint();
                 } else {
 //                    y = height;
@@ -118,27 +121,27 @@ public class Frame extends JFrame{
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             //public void drawRect(int x, int y, int width, int height): draw
-            for(int i = 0; i<=D_W/70; i++){
-	            g.fillRect(i*70, 0, 1, D_H);
+            for(int i = 0; i<=D_W/SCALE; i++){
+	            g.fillRect(i*SCALE, 0, 1, D_H);
             }
-            for(int j = 0; j<=D_H/70; j++){
-            	g.fillRect(0, j*70, D_W, 1);
+            for(int j = 0; j<=D_H/SCALE; j++){
+            	g.fillRect(0, j*SCALE, D_W, 1);
             }
             for(int cy=0; cy< MAP.length ; cy++){
     			for(int cx=0; cx< MAP[0].length; cx++){
     				if(!DUST[cy][cx]){
     					Color col = g.getColor();
     					g.setColor(Color.ORANGE);
-    					g.fillRect(cx*70+3, cy*70+3, 70-5, 70-5);
+    					g.fillRect(cx*SCALE+3, cy*SCALE+3, SCALE-5, SCALE-5);
     					g.setColor(col);
     				}
     				if(MAP[cy][cx]){
-    					g.fillRect(cx*70, cy*70, 70, 70);
+    					g.fillRect(cx*SCALE, cy*SCALE, SCALE, SCALE);
     				}
     			}
     		}
             g.setColor(Color.BLACK);
-            g.fillArc(x, y, 50,50,360-angle_,350);  
+            g.fillArc(x, y, SCALE/2,SCALE/2,360-angle_,350);  
             drawSeen((Graphics2D)g);
         }
         
@@ -156,7 +159,7 @@ public class Frame extends JFrame{
             			g.setColor(Color.CYAN);
             		}
             		if(seen.getX()>=0 && seen.getY()>=0){
-            			g.fillOval(((int)(seen.getX()*70))-6, ((int)(seen.getY()*70))-6, 12, 12);
+            			g.fillOval(((int)(seen.getX()*SCALE))-SCALE/4/2, ((int)(seen.getY()*SCALE))-SCALE/4/2, SCALE/4, SCALE/4);
             		}
             	}
     			g.setColor(col);
@@ -208,28 +211,28 @@ public class Frame extends JFrame{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			if(x < 70)
+			if(x < SCALE)
 			{
 				velx=0;
-				x = 70;		
+				x = SCALE;		
 			}
 			
-			if(x > D_W-1.7*70)
+			if(x > D_W-1.7*SCALE)
 			{
 				velx=0;
-				x=(int) (D_W-1.7*70);
+				x=(int) (D_W-1.7*SCALE);
 						
 			}
 			
-			if(y < 70)
+			if(y < SCALE)
 			{
 				vely=0;
-				y = 70;		
+				y = SCALE;		
 			}
 			
-			if(y > D_H-1.7*70)
+			if(y > D_H-1.7*SCALE)
 			{
-				y=(int) (D_H-1.7*70);
+				y=(int) (D_H-1.7*SCALE);
 				vely = 0;		
 			}			
 			x += velx;

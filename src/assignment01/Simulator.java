@@ -27,9 +27,9 @@ public class Simulator{
 	
 	
 	/** Constructs new Simulator */
-	public Simulator(BotEvolution evo){
+	public Simulator(BotEvolution evo, boolean[][] map){
 		this.evo = evo;
-		setMap(new boolean[8][8]);
+		setMap(map);
 	}
 	
 	/** Modifies the given map to have outer edges, sets it to be the test map */
@@ -134,6 +134,7 @@ public class Simulator{
 							nearness -= nearness/increments;
 						}
 						else{
+							//TODO
 							sensorIns[inc] = 1.0-nearness;
 							break;
 						}
@@ -142,9 +143,11 @@ public class Simulator{
 				}
 				else{
 					//No collision seen
+					//TODO
 					sensorIns[inc] = 0;
 				}
 				//Dust Sensors
+				//TODO
 				dustSensor[inc] = !dust[(int)(y+seenY)][(int)(x+seenX)]&&!map[(int)(y+seenY)][(int)(x+seenX)]?1:0;
 			}
 			//get Controller out

@@ -17,6 +17,8 @@ public class BotEvolution{
 	private static final int RANDOM_SEED = 12011994;
 	/** Random Object for use throughout the Bot evolution */
 	@Getter private Random random = new Random(RANDOM_SEED);
+	
+	private final int MAP_SIZE = 12;
 
 	/** Starts Evolutionary Process of bots, returns the best performing ANN once done */
 	public ANN20 initEvolution(){
@@ -27,7 +29,7 @@ public class BotEvolution{
 		//Initialization
 		final ANN20[] repANNs = new ANN20[3]; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
-		Simulator sim = new Simulator(this);
+		Simulator sim = new Simulator(this, makeMap(MAP_SIZE, MAP_SIZE, 8));
 		final ANN20[] population = new ANN20[INIT_POP];
 		for(int c=0; c<population.length; c++){
 			population[c] = new ANN20(27, 2, 8);
@@ -109,6 +111,10 @@ public class BotEvolution{
 			}
 			//-Post Generation Processing Housekeeping
 			generations++;
+			//Coevolution of the map
+			if(generations%100==0){
+				sim.setMap(makeMap(MAP_SIZE, MAP_SIZE, (generations/100)*16));
+			}
 			//Optional Console Outs
 			System.out.println("Gen: "+(generations-1)+", Best Individual Fitness: "+repANNfit[0]+", Median Fit: "+repANNfit[1]+", Worst Fit: "+repANNfit[2]);
 			//System.out.println(sim.getSimRecords().get(sim.getSimRecords().size()-1));
@@ -142,8 +148,19 @@ public class BotEvolution{
 		return repANNs[0];
 	}
 	
-	
-	
+	/** Creates new Map */
+	private boolean[][] makeMap(int width, int height, int obstacles){
+		boolean[][] map = new boolean[height][width];
+		for(int c=0; c<obstacles; c++){
+			int x, y;
+			do{
+				x = random.nextInt(map[0].length);
+				y = random.nextInt(map.length);
+			}while(map[y][x]);
+			map[y][x] = true;
+		}
+		return map;
+	}
 	
 	
 	
