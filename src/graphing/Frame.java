@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.swing.AbstractAction;
@@ -21,6 +22,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import util.Point;
 import assignment01.BotEvolution;
 import assignment01.Simulator;
 import assignment01.Simulator.Action;
@@ -40,7 +42,12 @@ public class Frame extends JFrame{
     int velx =0, vely =0;
     int angle_;
     
-    static boolean[][] MAP;
+    private static Frame thisHere = null;
+    
+    private Action lastAction = null;
+    
+    boolean[][] MAP;
+    boolean[][] DUST;
 
     public static int D_W;
     public static int D_H;
@@ -48,19 +55,25 @@ public class Frame extends JFrame{
  
     
     public void init(Recorder rec){
-    	
     	MAP = rec.getMap();
     	D_H = MAP.length*70;
     	D_W = MAP[0].length*70;
+    	this.DUST = new boolean[MAP.length][MAP[0].length];
     }
     
     public void update(Action act){
     	this.x = (int) (act.getX()*70-25);
     	this.y = (int) (act.getY()*70-25);
     	this.angle_ = (int) (act.getRotation()*360);
+    	DUST[(int)act.getY()][(int)act.getX()] = true;
+    	this.lastAction = act;
     }
 
     public Frame(int width, int height, int angle, Recorder rec) {
+    	if(thisHere!=null){
+    		thisHere.dispatchEvent(new WindowEvent(thisHere, WindowEvent.WINDOW_CLOSING));
+    	}
+    	thisHere = this;
     	init(rec);
     	x=width;
     	y=height;
@@ -91,7 +104,7 @@ public class Frame extends JFrame{
         add(drawPanel);
         
         pack();
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
     }
@@ -113,13 +126,41 @@ public class Frame extends JFrame{
             }
             for(int cy=0; cy< MAP.length ; cy++){
     			for(int cx=0; cx< MAP[0].length; cx++){
+    				if(!DUST[cy][cx]){
+    					Color col = g.getColor();
+    					g.setColor(Color.ORANGE);
+    					g.fillRect(cx*70+3, cy*70+3, 70-5, 70-5);
+    					g.setColor(col);
+    				}
     				if(MAP[cy][cx]){
     					g.fillRect(cx*70, cy*70, 70, 70);
     				}
     			}
     		}
             g.setColor(Color.BLACK);
-            g.fillArc(x, y, 50,50,angle_,350);  
+            g.fillArc(x, y, 50,50,360-angle_,350);  
+            drawSeen((Graphics2D)g);
+        }
+        
+        /** Draws Sensors */
+        private void drawSeen(Graphics2D g){
+        	Color col = g.getColor();
+        	boolean first = true;
+        	if(lastAction != null && lastAction.getSensors()!=null){
+        		for(Point seen : lastAction.getSensors()){
+            		if(first){
+            			g.setColor(Color.BLUE);
+            			first = false;
+            		}
+            		else{
+            			g.setColor(Color.CYAN);
+            		}
+            		if(seen.getX()>=0 && seen.getY()>=0){
+            			g.fillOval(((int)(seen.getX()*70))-6, ((int)(seen.getY()*70))-6, 12, 12);
+            		}
+            	}
+    			g.setColor(col);
+        	}
         }
 
         public Dimension getPreferredSize() {

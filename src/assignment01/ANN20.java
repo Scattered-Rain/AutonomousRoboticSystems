@@ -1,26 +1,40 @@
 package assignment01;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /** An Artificial Neural Network */
 public class ANN20{
 	
 	
+	private static final String DUMP_FOLDER = "nets";
+	
+	
 	/** The Learning Factor used for Reinforcement Learning*/
 	private static final double LEARNING_FACTOR = 16f;
 	
-	
 	/** The number of nodes that are in a layer, including input and output layer */
-	private int[] nodes;
+	@Getter private int[] nodes;
 	
 	/** The weights used in the ANN, in the form [layer][node], so that layer=0 is the set of weigths feeding into the first
 	 * hidden layer, etc., while node is ordered so that input 0 to hidden 0, input 0 to hidden 1 ... input i to input j 
 	 * while the bias node is assumed to be the last node in the list, i.e. bias node of layer k leads to nodes[k]+1*/
 	@Getter private double[][] weights;
+	
+	
+	/** The seed of the last Simultion this ANN20 was involved with, bit of a hack, but ehhhhh */
+	@Getter @Setter private int simSeed;
 	
 	
 	/** Constructor used by crossover */
@@ -219,6 +233,46 @@ public class ANN20{
 		return new ANN20(weights, mother.nodes, evo);
 	}
 	
+	/** Dumps the weights of the ANN */
+	public void dump(String fileName){
+		try{
+			PrintWriter writer = new PrintWriter(DUMP_FOLDER+File.separatorChar+fileName+".txt", "UTF-8");
+			StringBuffer buffer = new StringBuffer();
+			for(int c=0; c<weights.length; c++){
+				for(int c2=0; c2<weights[c].length; c2++){
+					buffer.append(weights[c][c2]);
+					buffer.append(" ");
+				}
+			}
+			writer.println(buffer.toString());
+			writer.close();
+		}catch(Exception ex){
+			System.out.println("Couldn't write ANN");
+			System.exit(0);
+		}
+	}
 	
+	/** Builds ANN from File */
+	public static ANN20 buildFromFile(int[] nodes, String file, BotEvolution evo){
+		double[][] weights = new double[nodes.length-1][];
+		try{
+			FileReader fReader = new FileReader(DUMP_FOLDER+File.separatorChar+file+".txt");
+			BufferedReader reader = new BufferedReader(fReader);
+			Scanner scanner = new Scanner(reader);
+			for(int c=0; c<weights.length; c++){
+				weights[c] = new double[(nodes[c]+1)*nodes[c+1]];
+				for(int c2=0; c2<weights[c].length; c2++){
+					weights[c][c2] = scanner.nextDouble();
+				}
+			}
+			fReader.close();
+			reader.close();
+			scanner.close();
+		}catch(Exception ex){
+			System.out.println("Couldn't load File!");
+			System.exit(0);
+		};
+		return new ANN20(weights, nodes, evo);
+	}
 	
 }

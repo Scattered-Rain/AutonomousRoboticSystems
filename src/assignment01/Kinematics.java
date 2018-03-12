@@ -17,10 +17,10 @@ public class Kinematics {
 	 */
 	public static double[] calculatePosition(Point velocity, Point coordinates, double initial_theta) {
 		if (velocity.getX() == velocity.getY()) {
-			return moveLinearly(velocity, coordinates, initial_theta);
+			return moveLinearly(velocity, coordinates, -initial_theta);
 		}
 		else {
-			return move(velocity, coordinates, initial_theta);
+			return move(velocity, coordinates, -initial_theta);
 		}
 	}
 	
@@ -42,7 +42,7 @@ public class Kinematics {
 		double[] new_position = new double[3];
 		new_position[0] = initial_x + total_velocity * DT;
 		new_position[1] = initial_y + total_velocity * DT;
-		new_position[2] = initial_theta;
+		new_position[2] = -initial_theta;
 		return new_position;
 	}
 	
@@ -93,7 +93,7 @@ public class Kinematics {
 			new_position[i] = sum + C[i];
 		}
 		
-		new_position[2] = Math.toDegrees(new_position[2]);
+		new_position[2] = -Math.toDegrees(new_position[2]);
 		return new_position;
 	}
 }

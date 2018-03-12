@@ -1,11 +1,12 @@
 package assignment01;
 
+import graphing.Frame;
+
 import java.util.Arrays;
 import java.util.Random;
 
 import assignment01.Simulator.Action;
 import assignment01.Simulator.Recorder;
-import graphing.Frame;
 import lombok.Getter;
 import util.Tuple;
 
@@ -21,28 +22,53 @@ public class BotEvolution{
 	public ANN20 initEvolution(){
 		final int INIT_POP = 300;
 		final double ELITE_PERCENTILE = 0.08;
-		final double TRUNCATED_PERCENTILE = 0.05;
+		final double TRUNCATED_PERCENTILE = 0.1;
 		final double MUTATION_RATE = 0.005;
 		//Initialization
-		ANN20[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
+		final ANN20[] repANNs = new ANN20[3]; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
 		Simulator sim = new Simulator(this);
-		ANN20[] population = new ANN20[INIT_POP];
+		final ANN20[] population = new ANN20[INIT_POP];
 		for(int c=0; c<population.length; c++){
-			population[c] = new ANN20(14, 2, 8);
+			population[c] = new ANN20(27, 2, 8);
 		}
-		
 		//Main evo loop
 		int generations = 0;
 		while(generations<100000){
 			//-Fitness Evaluation Step
 			//index linked array of fitnesses of individauls in the current population
-			double[] fitnesses = new double[population.length];
-			
-			for(int c=0; c<population.length; c++){
-				fitnesses[c] = sim.simulateFitness(population[c], true);
+			final double[] fitnesses = new double[population.length];
+			final int threads = 5;
+			Thread[] rThreads = new Thread[threads];
+			final boolean[] done = new boolean[threads];
+			for(int ts=0; ts<threads; ts++){
+				final int from = (population.length/threads)*ts;
+				final int to = (population.length/threads)*(ts+1);
+				final int id = ts;
+				try{
+					//Create new Thread to run part of the fitnessees
+					rThreads[ts] = new Thread(new Runnable(){
+						//runs it's part
+						public void run(){
+							for(int c=from; c<to; c++){
+								fitnesses[c] = sim.simulateFitness(population[c], false);
+							}
+							done[id] = true;
+						}
+					});
+					//starts thread
+					rThreads[ts].start();
+				}catch(Exception ex){}
 			}
-			
+			boolean threadsDone = false;
+			while(!threadsDone){
+				threadsDone = true;
+				for(int c=0; c<done.length; c++){
+					if(!done[c]){
+						threadsDone = false;
+					}
+				}
+			}
 			//-Selection & Generation Step
 			ANN20[] newPop = new ANN20[population.length];
 			//Sort according to fitnesses, preserve index linking
@@ -73,22 +99,53 @@ public class BotEvolution{
 				newPop[c] = ANN20.crossoverAndMutation(population[parents[0]], population[parents[1]], this, 0.8, MUTATION_RATE);
 			}
 			//Keep track of last generations best/med/worst ANN
-			repANNs = new ANN20[]{population[0], population[population.length/2], population[population.length-1]};
+			repANNs[0] = population[0];
+			repANNs[1] = population[population.length/2];
+			repANNs[2] = population[population.length-1];
 			repANNfit = new double[]{fitnesses[0], fitnesses[fitnesses.length/2], fitnesses[fitnesses.length-1]};
-
 			//replace old population with new Population
-			population = newPop;
-			
+			for(int c=0; c<population.length; c++){
+				population[c] = newPop[c];
+			}
 			//-Post Generation Processing Housekeeping
 			generations++;
-			
 			//Optional Console Outs
 			System.out.println("Gen: "+(generations-1)+", Best Individual Fitness: "+repANNfit[0]+", Median Fit: "+repANNfit[1]+", Worst Fit: "+repANNfit[2]);
 			//System.out.println(sim.getSimRecords().get(sim.getSimRecords().size()-1));
 			//System.out.println();
+			//draw best individual
+			if((generations==10 || generations%100==0) && generations!=0){
+				try{
+					new Thread(new Runnable(){
+						//runs it's part
+						public void run(){
+							sim.simulate(repANNs[0], repANNs[0].getSimSeed(), true);
+							Simulator.Recorder rec = sim.getSimRecords().get(sim.getSimRecords().size()-1);
+							Frame f = new Frame(600, 400, 0, rec);
+							for(Action a : rec.getActions()){
+								f.update(a);
+								try{Thread.sleep(100);}catch(Exception ex){}
+							}
+						}
+					}).start();
+				}catch(Exception ex){}
+			}
+			//write population to file
+			if(generations%100==0){
+				for(int c=0; c<population.length; c++){
+					population[c].dump("test"+c);
+				}
+			}
 		}
 		
 		System.out.println("Best Fitness: "+repANNfit[0]);
 		return repANNs[0];
 	}
+	
+	
+	
+	
+	
+	
+	
 }

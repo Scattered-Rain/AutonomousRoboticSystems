@@ -80,7 +80,9 @@ public class Simulator{
 		final double sensorRange = 0.9;
 		final double speed = 0.9;
 		final int iterations = 500;
-		Random rand = new Random(randomSeed);//randomSeed);
+		randomSeed = 12011994;//TODO: Debug, plox remove, thankz
+		Random rand = new Random(randomSeed);
+		controller.setSimSeed(randomSeed);
 		Recorder rec = null;
 		if(record){
 			rec = new Recorder(map);
@@ -97,8 +99,9 @@ public class Simulator{
 			y = rand.nextDouble() * map.length;
 		}while(map[(int)y][(int)x]);
 		//Simulate
-		double[] wheels = new double[2];
+		double[] wheels = new double[]{1, 1};
 		double[] sensorIns = new double[12];
+		double[] dustSensor = new double[sensorIns.length+1];//Dust sensor, where index 12 is dust on self, and 0-11 are dust on corresponding sensor reach
 		for(int c=0; c<iterations; c++){
 			if(record){
 				rec.add(new Action(x, y, rota));
@@ -110,11 +113,17 @@ public class Simulator{
 				}
 			}
 			//calculate sensory inputs
-			double inputAngleDifference = 1.0 / sensorIns.length;
+			double inputAngleDifference = 1.0 / ((double)sensorIns.length);
+			//System.out.println();
+			//System.out.print(x+"|"+y+", "+inputAngleDifference+"< "+rota+" >> ");
 			for(int inc=0; inc<sensorIns.length; inc++){
 				double seenAngle = (rota + inputAngleDifference*inc) % 1.0;
 				double seenX = Math.cos(Math.toRadians(seenAngle*360))*sensorRange;
 				double seenY = Math.sin(Math.toRadians(seenAngle*360))*sensorRange;
+				if(record){
+					rec.actions.get(rec.actions.size()-1).sensors.add(new Point(x+seenX, y+seenY));
+				}
+				//System.out.print("$ "+seenAngle+" "+(x+seenX)+"|"+(y+seenY)+"   ");
 				if(map[(int)(y+seenY)][(int)(x+seenX)]){
 					//Collision is seen, calculate nearness of obstacle (directly on it=~1, very far away=~0)
 					//TODO improve this here code
@@ -129,27 +138,37 @@ public class Simulator{
 							break;
 						}
 					}
-					sensorIns[inc] = 1;
+					//sensorIns[inc] = 1;
 				}
 				else{
 					//No collision seen
 					sensorIns[inc] = 0;
 				}
+				//Dust Sensors
+				dustSensor[inc] = !dust[(int)(y+seenY)][(int)(x+seenX)]?1:0;
 			}
 			//get Controller out
-			double[] inputs = new double[sensorIns.length + wheels.length];
+			double[] inputs = new double[sensorIns.length + wheels.length + dustSensor.length];
 			System.arraycopy(sensorIns, 0, inputs, 0, sensorIns.length);
 			System.arraycopy(wheels, 0, inputs, sensorIns.length, wheels.length);
+			System.arraycopy(dustSensor, 0, inputs, sensorIns.length+wheels.length, dustSensor.length);
+			
+//			System.out.print(rota+" >> ");
+//			for(int cvg=0; cvg<inputs.length; cvg++){
+//				System.out.print(inputs[cvg]+" ");
+//			}
+//			System.out.println();
+			
 			if(humanController!=null){
 				//update wheels based on human interaction (For debugging purposes)
 				wheels = humanController.wheels;
 			}
 			else{
 				//update wheels the via ANN
-				wheels = controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//
+				wheels = new double[]{rand.nextDouble(), rand.nextDouble()};//controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//
 			}
 			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]*2-1))*speed, ((wheels[1]*2-1))*speed), new Point(x, y), rota);
-			rota = newPos[2];
+			rota = newPos[2]<0?Math.abs(1-(Math.abs(newPos[2]%1))):newPos[2]%1;
 			double newX = newPos[0];
 			double newY = newPos[1];
 			//check collision
@@ -174,6 +193,7 @@ public class Simulator{
 				y = newY;
 			}
 			//Add anti-dust
+			dustSensor[dustSensor.length-1] = !dust[(int)y][(int)x]?1:0;
 			dust[(int)y][(int)x] = true;
 		}
 		//Calculate score
@@ -204,7 +224,7 @@ public class Simulator{
 	/** Object keeping track of every action happening in the simulation */
 	public static class Recorder{
 		/** The Map used for the recorded Simulation */
-		static @Getter boolean[][] map;
+		@Getter boolean[][] map;
 		/** List of all Actions that have been taken by the Bot during the Simulation */
 		@Getter private List<Action> actions;
 		/** Constructs new empty Recorder based on Map */
@@ -227,13 +247,23 @@ public class Simulator{
 	}
 	
 	/** Object Representing the result of an action taken by the bot (i.e. movement and rotation) */
-	@AllArgsConstructor public static class Action{
+	public static class Action{
 		/** The x location of the bot */
 		@Getter private double x;
 		/** The Y location of the bot */
 		@Getter private double y;
 		/** The rotation of the bot, 0-1 range, where 0 points in up (0, -1) direction */
 		@Getter private double rotation;
+		/** The Sensor Points */
+		@Getter @Setter private List<Point> sensors;
+		
+		public Action(double x, double y, double rotation){
+			this.x = x;
+			this.y = y;
+			this.rotation = rotation;
+			this.sensors = new ArrayList<Point>();
+		}
+		
 		public String toString(){
 			return "Point: "+x+"|"+y+", Angle: "+rotation;
 		}
