@@ -49,8 +49,9 @@ public class Simulator{
 	
 	
 	/** Simulates the bot controller, returns fitnessvalue */
-	public double simulateFitness(ANN controller, boolean record){
-		int tests = 1;
+	public double simulateFitness(ANN20 controller, boolean record){
+		//out = simulateDebug(controller);
+		double tests = 3.0;
 		double out = 0;
 		for(int c=0; c<tests; c++){
 			out += simulate(controller, evo.getRandom().nextInt(Integer.MAX_VALUE), record);
@@ -59,8 +60,8 @@ public class Simulator{
 	}
 	
 	/** Does the actual simulation step (as a simple debug function to check that the evolution algorithm and ANN are working properly) */
-	public double simulateDebug(ANN controller){
-		double[] testGoals = new double[]{0.5, 0.5};
+	public double simulateDebug(ANN20 controller){
+		double[] testGoals = new double[]{0.2, 0.8};
 		Random rand = new Random(1502);
 		double out = 0;
 		double[] sensAndMem = new double[14];
@@ -73,11 +74,11 @@ public class Simulator{
 	}
 	
 	/** Simulates Robot */
-	public double simulate(ANN controller, int randomSeed, boolean record){
+	public double simulate(ANN20 controller, int randomSeed, boolean record){
 		final double sensorRange = 0.9;
-		final double speed = 0.7;
-		final int iterations = 100;
-		Random rand = new Random(666);//randomSeed);
+		final double speed = 0.9;
+		final int iterations = 500;
+		Random rand = new Random(randomSeed);//randomSeed);
 		Recorder rec = null;
 		if(record){
 			rec = new Recorder(map);
@@ -145,7 +146,7 @@ public class Simulator{
 				//update wheels the via ANN
 				wheels = controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//
 			}
-			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]))*speed, ((wheels[1]))*speed), new Point(x, y), rota);
+			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]*2-1))*speed, ((wheels[1]*2-1))*speed), new Point(x, y), rota);
 			rota = newPos[2];
 			double newX = newPos[0];
 			double newY = newPos[1];
@@ -183,7 +184,7 @@ public class Simulator{
 		if(record){
 			this.simRecords.add(rec);
 		}
-		return out;
+		return out;//999.0;//wheels[0] + wheels[1];
 	}
 	
 	/** Draws Map to the Console */

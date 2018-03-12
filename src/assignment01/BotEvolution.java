@@ -15,24 +15,23 @@ public class BotEvolution{
 	@Getter private Random random = new Random(RANDOM_SEED);
 
 	/** Starts Evolutionary Process of bots, returns the best performing ANN once done */
-	public ANN initEvolution(){
-		final int INIT_POP = 200;
-		final String SELECTION_ALGORITHM = "ELITIST";
-
-		//Initialisation
-		ANN[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
+	public ANN20 initEvolution(){
+		final int INIT_POP = 300;
+		final double ELITE_PERCENTILE = 0.08;
+		final double TRUNCATED_PERCENTILE = 0.05;
+		final double MUTATION_RATE = 0.005;
+		//Initialization
+		ANN20[] repANNs = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: ANN in population
 		double[] repANNfit = null; //index=3 where 0=best ANN, 1=median ANN, 2=worst ANN: Fitness of ANN in population, index linked to repANNs
 		Simulator sim = new Simulator(this);
-		ANN[] population = new ANN[INIT_POP];
-		
+		ANN20[] population = new ANN20[INIT_POP];
 		for(int c=0; c<population.length; c++){
-			population[c] = new ANN(this);
+			population[c] = new ANN20(14, 2, 8);
 		}
 		
 		//Main evo loop
 		int generations = 0;
-		
-		while(generations < 1000){
+		while(generations<100000){
 			//-Fitness Evaluation Step
 			//index linked array of fitnesses of individauls in the current population
 			double[] fitnesses = new double[population.length];
@@ -42,13 +41,36 @@ public class BotEvolution{
 			}
 			
 			//-Selection & Generation Step
-			ANN[] newPop = new EvoAlgorithm().selection(SELECTION_ALGORITHM, this, population, fitnesses);
-
+			ANN20[] newPop = new ANN20[population.length];
+			//Sort according to fitnesses, preserve index linking
+			for(int c=0; c<population.length; c++){
+				for(int c2=c+1; c2<population.length; c2++){
+					if(fitnesses[c2] > fitnesses[c]){
+						double helpF = fitnesses[c];
+						fitnesses[c] = fitnesses[c2];
+						fitnesses[c2] = helpF;
+						ANN20 helpA = population[c];
+						population[c] = population[c2];
+						population[c2] = helpA;
+					}
+				}
+			}
+			//Add Elite
+			for(int c=0; c<(int)(population.length*ELITE_PERCENTILE); c++){
+				newPop[c] = population[c];
+			}
+			//Create Offspring :D (Elitist Truncated Rank Based Stupid)
+			for(int c=(int)(population.length*ELITE_PERCENTILE); c<population.length; c++){
+				//Select mother and father
+				int[] parents = new int[2];
+				for(int c2=0; c2<parents.length; c2++){
+					parents[c2] = random.nextInt((int)(population.length - population.length*TRUNCATED_PERCENTILE));
+				}
+				//Make a Baby (This method is NSFW)
+				newPop[c] = ANN20.crossoverAndMutation(population[parents[0]], population[parents[1]], this, 0.8, MUTATION_RATE);
+			}
 			//Keep track of last generations best/med/worst ANN
-			Tuple<ANN[], double[]> rankedIndividuals = EvoAlgorithm.rankIndividuals(population, fitnesses);
-			population = rankedIndividuals.getA();
-			fitnesses = rankedIndividuals.getB();
-			repANNs = new ANN[]{population[0], population[population.length/2], population[population.length-1]};
+			repANNs = new ANN20[]{population[0], population[population.length/2], population[population.length-1]};
 			repANNfit = new double[]{fitnesses[0], fitnesses[fitnesses.length/2], fitnesses[fitnesses.length-1]};
 
 			//replace old population with new Population
