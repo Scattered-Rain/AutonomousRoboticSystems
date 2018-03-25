@@ -96,4 +96,71 @@ public class Kinematics {
 		new_position[2] = -Math.toDegrees(new_position[2]);
 		return new_position;
 	}
+
+
+	private static double odometry_motion_model (Point initial_pose, Point final_pose, Point initial_odom_pose, Point final_odom_pose, double initial_theta, double final_theta, double initial_odom_theta, double final_odom_theta) {
+		
+		double init_x = initial_pose.getX();
+		double init_y = initial_pose.getY();
+		double final_x = final_pose.getX();
+		double final_y = final_pose.getY();
+		double init_odom_x = initial_odom_pose.getX();
+		double init_odom_y = initial_odom_pose.getY();
+		double final_odom_x = final_odom_pose.getX();
+		double final_odom_y = final_odom_pose.getY();
+		
+		double delta_rot1 = (Math.atan2(final_odom_y - init_odom_y,final_odom_x - init_odom_x)) - initial_odom_theta;
+		double delta_trans_x = Math.pow(init_odom_x - final_odom_x, 2);
+		double delta_trans_y = Math.pow(init_odom_y - final_odom_y, 2);
+		double delta_trans = Math.sqrt(delta_trans_x + delta_trans_y);
+		double delta_rot2 = final_odom_theta - initial_odom_theta - delta_rot1;
+		
+		double real_delta_rot1 = (Math.atan2(final_y - init_y,final_x - init_x)) - initial_theta;
+		double real_delta_trans_x = Math.pow(init_x - final_x, 2);
+		double real_delta_trans_y = Math.pow(init_y - final_y, 2);
+		double real_delta_trans = Math.sqrt(real_delta_trans_x + real_delta_trans_y);
+		double real_delta_rot2 = final_theta - initial_theta - real_delta_rot1;
+		
+		//TODO check the values for alphas
+		//random choice here
+		
+		double alpha1 = 0.025;
+		double alpha2 = 0.354;
+		double alpha3 = 0.2;
+		double alpha4 = 0.075;
+		
+		//normal distribution
+		double p1 = prob_normal_distribution(delta_rot1 - real_delta_rot1, alpha1*real_delta_rot1 + alpha2*real_delta_trans);
+		double p2 = prob_normal_distribution(delta_trans - real_delta_trans, alpha3*real_delta_trans + alpha4*(real_delta_rot1 + real_delta_rot2));
+		double p3 = prob_normal_distribution(delta_rot2 - real_delta_rot2, alpha1*real_delta_rot2 + alpha2*real_delta_trans);
+		
+		//triangular distribution
+		//double p1 = prob_triangular_distribution(delta_rot1 - real_delta_rot1, alpha1*real_delta_rot1 + alpha2*real_delta_trans);
+		//double p2 = prob_triangular_distribution(delta_trans - real_delta_trans, alpha3*real_delta_trans + alpha4*(real_delta_rot1 + real_delta_rot2));
+		//double p3 = prob_triangular_distribution(delta_rot2 - real_delta_rot2, alpha1*real_delta_rot2 + alpha2*real_delta_trans);
+		
+		return p1*p2*p3;
+	}
+	
+	private static double prob_normal_distribution(double a, double b) {
+		
+		double denominator = Math.sqrt(2*(Math.PI)*(Math.pow(b, 2)));
+		double numerator = Math.exp((-Math.pow(a, 2))/(2*Math.pow(b, 2)));
+		double epsilon = numerator/denominator;
+		
+		return epsilon;
+		
+	}
+	
+	private static double prob_triangular_distribution(double a, double b) {
+		
+		double element1 = 1 / (b * Math.sqrt(6));
+		double element2 = (Math.abs(a)) / (6 * Math.pow(b, 2));
+		double epsilon = Math.max(0, element1 - element2);
+		
+		return epsilon;
+		
+	}
+	
 }
+
