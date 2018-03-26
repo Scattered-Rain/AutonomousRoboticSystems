@@ -1,6 +1,7 @@
 package assignment01;
 
 import util.Point;
+import util.Tuple;
 
 public class Kinematics {
 	private static final double L = 10;
@@ -24,27 +25,27 @@ public class Kinematics {
 		}
 	}
 	
-//	/**
-//	 * This method handles the case when the velocities of the left and right wheels are equal
-//	 * and the robot moves linearly with no rotation.
-//	 * 
-//	 * @param velocity - The initial velocity in the form Point(left_velocity, right_velocity)
-//	 * @param coordinates - The initial position using [x,y] coordinates in the form Point(x,y)
-//	 * @param initial_theta - The initial angle
-//	 * @return - The new position of the robot in the form [new_x, new_y, new_theta]
-//	 */
-//	private static double[] moveLinearly(Point velocity, Point coordinates, double initial_theta) {
-//		double left_velocity = velocity.getX();
-//		double right_velocity = velocity.getY();
-//		double total_velocity = (left_velocity + right_velocity)/2;
-//		double initial_x = coordinates.getX();
-//		double initial_y = coordinates.getY();
-//		double[] new_position = new double[3];
-//		new_position[0] = initial_x + total_velocity * DT;
-//		new_position[1] = initial_y + total_velocity * DT;
-//		new_position[2] = -initial_theta;
-//		return new_position;
-//	}
+	/**
+	 * This method handles the case when the velocities of the left and right wheels are equal
+	 * and the robot moves linearly with no rotation.
+	 * 
+	 * @param velocity - The initial velocity in the form Point(left_velocity, right_velocity)
+	 * @param coordinates - The initial position using [x,y] coordinates in the form Point(x,y)
+	 * @param initial_theta - The initial angle
+	 * @return - The new position of the robot in the form [new_x, new_y, new_theta]
+	 */
+	private static double[] moveLinearly(Point velocity, Point coordinates, double initial_theta) {
+		double left_velocity = velocity.getX();
+		double right_velocity = velocity.getY();
+		double total_velocity = (left_velocity + right_velocity)/2;
+		double initial_x = coordinates.getX();
+		double initial_y = coordinates.getY();
+		double[] new_position = new double[3];
+		new_position[0] = initial_x + total_velocity * DT;
+		new_position[1] = initial_y + total_velocity * DT;
+		new_position[2] = -initial_theta;
+		return new_position;
+	}
 	
 	/**
 	 * This method handles the case when the velocities of the left and right wheels are not equal
@@ -98,16 +99,20 @@ public class Kinematics {
 	}
 
 
-	private static double odometry_motion_model (Point initial_pose, Point final_pose, Point initial_odom_pose, Point final_odom_pose, double initial_theta, double final_theta, double initial_odom_theta, double final_odom_theta) {
-		
-		double init_x = initial_pose.getX();
-		double init_y = initial_pose.getY();
-		double final_x = final_pose.getX();
-		double final_y = final_pose.getY();
-		double init_odom_x = initial_odom_pose.getX();
-		double init_odom_y = initial_odom_pose.getY();
-		double final_odom_x = final_odom_pose.getX();
-		double final_odom_y = final_odom_pose.getY();
+	private static double odometry_motion_model (Tuple initial_pose, Tuple final_pose, Tuple initial_odom_pose, Tuple final_odom_pose) {
+//		Tuple<Point,Double> point = new Tuple<Point,Double>(initial_pose, initial_theta);
+		double init_x = ((Point)initial_pose.getA()).getX();
+		double init_y = ((Point)initial_pose.getA()).getY();
+		double initial_theta = (double)initial_pose.getB();
+		double final_x = ((Point)final_pose.getA()).getX();
+		double final_y = ((Point)final_pose.getA()).getY();
+		double final_theta = (double)final_pose.getB();
+		double init_odom_x = ((Point)initial_odom_pose.getA()).getX();
+		double init_odom_y = ((Point)initial_odom_pose.getA()).getY();
+		double initial_odom_theta = (double)initial_odom_pose.getB();
+		double final_odom_x = ((Point)final_odom_pose.getA()).getX();
+		double final_odom_y = ((Point)final_odom_pose.getA()).getY();
+		double final_odom_theta = (double)final_odom_pose.getB();
 		
 		double delta_rot1 = (Math.atan2(final_odom_y - init_odom_y,final_odom_x - init_odom_x)) - initial_odom_theta;
 		double delta_trans_x = Math.pow(init_odom_x - final_odom_x, 2);
