@@ -211,4 +211,49 @@ public class LaserScannerModel {
 		return discoveredBeacons;
 	}
 	
+	
+	public static Point findXfromBeacons(List<Point> beacons, List<Double> distance){
+		int i=0;
+		int flag =0;
+		List<Integer> indexes = new ArrayList<Integer>();
+		while(i < distance.size() && flag<3) {
+			if(distance.get(i)!=-1){
+				flag++;
+				indexes.add(i);
+			}
+			i++;
+		}
+		if (flag<3){
+			return null;
+		}else{
+			//System.out.println(flag+"\n"+indexes);
+			double a = Math.sqrt(Math.pow((beacons.get(indexes.get(1)).getIntX()-beacons.get(indexes.get(0)).getIntX()),2) + Math.pow((beacons.get(indexes.get(1)).getIntY()-beacons.get(indexes.get(0)).getIntY()),2));
+			double xx = (Math.pow(a, 2) + Math.pow(distance.get(indexes.get(0)),2) - Math.pow(distance.get(indexes.get(1)),2)) / (2*a);
+			double yy = Math.sqrt(Math.pow(distance.get(indexes.get(0)),2) - Math.pow(xx, 2));
+			double yyminus = -yy;
+			//System.out.println(xx);
+			Point x = new Point(xx,yy);
+			Point xtonos = new Point(xx,yyminus);
+			System.out.println(x);
+			System.out.println(xtonos);
+			a = Math.sqrt(Math.pow((beacons.get(indexes.get(2)).getIntX()-beacons.get(indexes.get(1)).getIntX()),2) + Math.pow((beacons.get(indexes.get(2)).getIntY()-beacons.get(indexes.get(1)).getIntY()),2));
+			xx = (Math.pow(a, 2) + Math.pow(distance.get(indexes.get(1)),2) - Math.pow(distance.get(indexes.get(2)),2)) / (2*a);
+			yy = Math.sqrt(Math.pow(distance.get(indexes.get(1)),2) - Math.pow(xx, 2));
+			Point xdistono = new Point(xx,yy);
+			Point xtreistono = new Point(xx,-yy);
+			System.out.println(xdistono);
+			System.out.println(xtreistono);
+			if (x.equals(xdistono) || x.equals(xtreistono)){
+				return x;
+			}
+			if (xtonos.equals(xdistono) || xtonos.equals(xtreistono)){
+				return xtonos;
+			}
+			
+			return null;
+		}
+		
+	}
+	
+	
 }
