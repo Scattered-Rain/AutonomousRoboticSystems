@@ -99,7 +99,7 @@ public class Kinematics {
 	}
 
 
-	private static double odometry_motion_model (Tuple initial_pose, Tuple final_pose, Tuple initial_odom_pose, Tuple final_odom_pose) {
+	public static double odometry_motion_model (Tuple initial_pose, Tuple final_pose, Tuple initial_odom_pose, Tuple final_odom_pose) {
 //		Tuple<Point,Double> point = new Tuple<Point,Double>(initial_pose, initial_theta);
 		double init_x = ((Point)initial_pose.getA()).getX();
 		double init_y = ((Point)initial_pose.getA()).getY();

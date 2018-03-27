@@ -28,6 +28,11 @@ public class Point{
 		}
 	}
 	
+	/** Returns the distances between this and the given point */
+	public double distance(Point point){
+		return Math.sqrt(Math.pow(x-point.x, 2)+Math.pow(y-point.y, 2));
+	}
+	
 	/** Constructs new Point given an single XY */
 	public Point(double xy){
 		this(xy, xy);

@@ -30,8 +30,9 @@ public class LaserScannerModel {
 		ArrayList<Point> beaconsList = new ArrayList<Point>();
 		
 		for (int i = 0; i<this.occupancyGridMap.length; i++) {
-			for (int j = 0; i<this.occupancyGridMap[i].length; j++) {
-				if (occupancyGridMap[i][j] == true) {
+			for (int j = 0; j<this.occupancyGridMap[i].length; j++) {
+				occupancyGridMap[i][j] = true;
+				if (occupancyGridMap[i][j]) {
 					beaconsList.add(new Point(i, j));
 				}
 			}
@@ -50,30 +51,32 @@ public class LaserScannerModel {
 	
 	
 
-	public Tuple<ArrayList<Double>, Tuple<Point, Double>> checkBeaconsInDirection(ArrayList<Double> beaconsDistances, Point location, int direction) {
+	public Tuple<List<Double>, Tuple<Point, Double>> checkBeaconsInDirection(List<Double> beaconsFound, Point location, int direction) {
 		boolean beaconFound = false;
 		Point obstacleCoordinates = null;
 		double distance = 0.0;
 		
-		for(int i = 0; i<K || !beaconFound; i++) {
+		for(int i = 0; i<K && !beaconFound; i++) {
 			location = returnCoordinates(location, direction);
 			int x = (int)location.getIntX();
 			int y = (int)location.getIntY();
 			
-			if (this.getOccupancyGridMap()[x][y]) {
-				obstacleCoordinates = new Point(x, y);
-				int indexOfBeaconListIndex = this.beaconsList.indexOf(obstacleCoordinates);
-				
-				if (indexOfBeaconListIndex != -1) {
-					distance = (double)i + 1.0;
-					beaconsDistances.add(indexOfBeaconListIndex, distance);
-					beaconFound = true;
+			try{
+				if (this.getOccupancyGridMap()[y][x]) {
+					obstacleCoordinates = new Point(x, y);
+					int indexOfBeaconListIndex = this.beaconsList.indexOf(obstacleCoordinates);
+					
+					if (indexOfBeaconListIndex != -1) {
+						distance = (double)i + 1.0;
+						beaconsFound.add(indexOfBeaconListIndex, distance);
+						beaconFound = true;
+					}
+					
 				}
-				
-			}
+			}catch(Exception ex){}
 		}
 		
-		return new Tuple<ArrayList<Double>, Tuple<Point, Double>>(beaconsDistances, new Tuple<Point, Double>(obstacleCoordinates, distance));
+		return new Tuple<List<Double>, Tuple<Point, Double>>(beaconsFound, new Tuple<Point, Double>(obstacleCoordinates, distance));
 	}
 	
 	public Point returnCoordinates(Point coordinates, int direction) {
@@ -114,24 +117,24 @@ public class LaserScannerModel {
 		return new Point(x,y);
 	}
 	
-	public Tuple<ArrayList<Double>, ArrayList<Tuple<Point,Double>>> scanArea(Point location) {
+	public Tuple<List<Double>, ArrayList<Tuple<Point,Double>>> scanArea(Point location) {
 		
 		
-		ArrayList<Double> beaconsFound = (ArrayList<Double>) Arrays.asList(LaserScannerModel.initialiseArray(new Double[this.beaconsList.size()]));
+		List<Double> beaconsFound = Arrays.asList(LaserScannerModel.initialiseArray(new Double[this.beaconsList.size()]));
 		ArrayList<Tuple<Point,Double>> scan = new ArrayList<Tuple<Point,Double>>();
 		
 		for (int i = 0; i<K; i++) {
-			Tuple<ArrayList<Double>, Tuple<Point, Double>> checkBeaconsInDirectionResults = checkBeaconsInDirection(beaconsFound, location, i);
+			Tuple<List<Double>, Tuple<Point, Double>> checkBeaconsInDirectionResults = checkBeaconsInDirection(beaconsFound, location, i);
 			beaconsFound = checkBeaconsInDirectionResults.getA();
 			Tuple<Point, Double> measurement = checkBeaconsInDirectionResults.getB();
 			scan.add(measurement);
 		}
 		
-		return new Tuple<ArrayList<Double>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
+		return new Tuple<List<Double>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
 	}
 	
-	public double computeRangeScanLikelihood(Point location) {
-		ArrayList<Double> beaconsFound = scanArea(location).getA();
+	public List<Double> computeRangeScanLikelihood(Point location) {
+		List<Double> beaconsFound = scanArea(location).getA();
 		ArrayList<Tuple<Point,Double>> scan = scanArea(location).getB();
 		ArrayList<Tuple<Point,Double>> actualMesaurements = calculateActualMeasurements(scan, location);
 		
@@ -143,7 +146,7 @@ public class LaserScannerModel {
 			
 		}
 		
-		return 0.55555;
+		return beaconsFound;
 	}
 	
 //	public double calculateN(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMesaurements) {
@@ -159,8 +162,10 @@ public class LaserScannerModel {
 		
 		for (int i = 0; i<scan.size(); i++) {
 			Point beaconCoordinates = scan.get(i).getA();
-			double actualMeasurement = calculateDistanceBetweenPoints(location, beaconCoordinates);
-			actualMesaurements.add(new Tuple<Point,Double>(beaconCoordinates, actualMeasurement));
+			if(beaconCoordinates != null){
+				double actualMeasurement = calculateDistanceBetweenPoints(location, beaconCoordinates);
+				actualMesaurements.add(new Tuple<Point,Double>(beaconCoordinates, actualMeasurement));
+			}
 		}
 		
 		return actualMesaurements;

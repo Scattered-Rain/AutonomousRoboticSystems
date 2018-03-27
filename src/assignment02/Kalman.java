@@ -3,6 +3,7 @@ package assignment02;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Setter;
 
 import org.ejml.simple.SimpleMatrix;
@@ -23,48 +24,25 @@ import assignment01.Kinematics;
 	
 	
 	/** Memory of x */
-	@Setter private SimpleMatrix xLast;
+	@Getter @Setter private SimpleMatrix xLast;
 	/** Memory of sigma */
 	@Setter private SimpleMatrix lastSigma;
 	/** Memory of mu */
-	@Setter private SimpleMatrix lastMu;
+	@Getter @Setter private SimpleMatrix lastMu;
 	
 	
 	/** Does Kalman Processing */
-	public SimpleMatrix[] doTheKalman(double[] control, SimpleMatrix procNoise, SimpleMatrix measureNoise, List[] beacons){
+	public SimpleMatrix[] doTheKalman(double[] control, SimpleMatrix mNoise, SimpleMatrix pNoise, SimpleMatrix z){
 		SimpleMatrix u = new SimpleMatrix(new double[][]{
 				{control[0]},
 				{control[1]},
 				{control[2]}
 		});
 		//Prep x & z
-		SimpleMatrix x = a.mult(xLast)	.plus(b.mult(u))	.plus(procNoise);
-		//SimpleMatrix z = c.mult(x)	.plus(measureNoise);
-		//Prepare observation z
-		double mX = x.get(0, 0);
-		double mY = x.get(1, 0);
-		double mT = x.get(2, 0);
-		List<Point> bl = beacons[0];
-		List<Double> bld = beacons[1];
-		for(int c=0; c<beacons[0].size(); c++){
-			if(bld.get(c)!=-1){
-				//There is a beacon of id c seen
-				Point loc = bl.get(c);
-				double xDist = mX-loc.getX();
-				double yDist = mY-loc.getY();
-				double dist = Math.sqrt((Math.pow(xDist, 2) + Math.pow(yDist, 2))) - bld.get(c);
-				mX += (xDist/(xDist+yDist)) * dist;
-				mY += (yDist/(xDist+yDist)) * dist;
-			}
-		}
-		SimpleMatrix z = new SimpleMatrix(new double[][]{
-				{mX},
-				{mY},
-				{mT}
-		});
+		SimpleMatrix x = a.mult(xLast)	.plus(b.mult(u))	.plus(mNoise.get(0, 0));
 		//R & Q Variance-Covariance Matrix
-		SimpleMatrix r = buildVcMatrix(procNoise);
-		SimpleMatrix q = buildVcMatrix(measureNoise);
+		SimpleMatrix r = mNoise;
+		SimpleMatrix q = pNoise;
 		//Prediction
 		SimpleMatrix muHat = a.mult(lastMu)	.plus(b.mult(u));
 		SimpleMatrix sigmaHat = a.mult(lastSigma).mult(a.transpose())	.plus(r);
@@ -114,19 +92,19 @@ import assignment01.Kinematics;
 				{0, 0, 1}
 		});
 		SimpleMatrix x = new SimpleMatrix(new double[][]{
-				{initX[0], 0, 0},
-				{0, initX[1], 0},
-				{0, 0, initX[2]}
+				{initX[0]},
+				{initX[1]},
+				{initX[2]}
 		});
 		SimpleMatrix sigma = new SimpleMatrix(new double[][]{
-				{initX[0], 0, 0},
-				{0, initX[1], 0},
-				{0, 0, initX[2]}
+				{0, 0, 0},
+				{0, 0, 0},
+				{0, 0, 0}
 		});
 		SimpleMatrix mu = new SimpleMatrix(new double[][]{
-				{initX[0], 0, 0},
-				{0, initX[1], 0},
-				{0, 0, initX[2]}
+				{initX[0]},
+				{initX[1]},
+				{initX[2]}
 		});
 		return new Kalman(a, b, c, x, sigma, mu);
 	}

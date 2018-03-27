@@ -25,6 +25,8 @@ public class Simulator{
 	/** The Map in boolean dimension (where true=collision, false=walkable), map[y][x] */
 	boolean[][] map;
 	
+	public static final double speed = 0.9;
+	
 	
 	/** Constructs new Simulator */
 	public Simulator(boolean[][] map){
@@ -51,8 +53,7 @@ public class Simulator{
 	/** Simulates Robot */
 	public double simulate(KalmanKontroller controller, int randomSeed, boolean record){
 		final double sensorRange = 0.9;
-		final double speed = 0.9;
-		final int iterations = map.length*map[0].length;
+		final int iterations = 9999;
 		//randomSeed = 12011994;//TODO: Debug, plox remove, thankz
 		Random rand = new Random(randomSeed);
 		Recorder rec = null;
@@ -62,7 +63,7 @@ public class Simulator{
 		//Build dust map (false = not yet cleaned)
 		boolean[][] dust = new boolean[map.length][map[0].length];
 		//init bot as rotation and X|Y with chance of spawning anywhere without collision on map
-		double rota = rand.nextDouble();
+		double rota = 0;//rand.nextDouble();
 		double x = -1;
 		double y = -1;
 		do{
@@ -143,9 +144,9 @@ public class Simulator{
 			}
 			else{
 				//update wheels the via ANN
-				wheels = controller.process(inputs);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//new double[]{rand.nextDouble(), rand.nextDouble()};//
+				wheels = controller.process(inputs, new Point(x, y), rota);//new double[]{evo.getRandom().nextDouble(), evo.getRandom().nextDouble()};//new double[]{rand.nextDouble(), rand.nextDouble()};//
 			}
-			double[] newPos = Kinematics.calculatePosition(new Point(((wheels[0]*2-1))*speed, ((wheels[1]*2-1))*speed), new Point(x, y), rota);
+			double[] newPos = kin(wheels, rota, new Point(x, y));
 			rota = newPos[2]<0?Math.abs(1-(Math.abs(newPos[2]%1))):newPos[2]%1;
 			double newX = newPos[0];
 			double newY = newPos[1];
@@ -253,6 +254,11 @@ public class Simulator{
 		@Getter private double[] wheels;
 		/** Boolean to check whether this input has already caused an input (to be manually set true once used in Simulation) */
 		@Getter @Setter private boolean updated;
+	}
+	
+	
+	public static double[] kin(double[] wheels, double rota, Point loc){
+		return Kinematics.calculatePosition(new Point(((wheels[0]*2-1))*speed, ((wheels[1]*2-1))*speed), loc, rota%1);
 	}
 	
 }
