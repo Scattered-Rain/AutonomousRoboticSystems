@@ -50,12 +50,12 @@ public class LaserScannerModel {
 	
 	
 
-	public Tuple<ArrayList<Double>, Tuple<Point, Double>> checkBeaconsInDirection(ArrayList<Double> beaconsDistances, Point location, int direction) {
+	public Tuple<ArrayList<DiscoveredBeacon>, Tuple<Point, Double>> checkBeaconsInDirection(ArrayList<DiscoveredBeacon> discoveredBeacons, Point location, int direction) {
 		boolean beaconFound = false;
 		Point obstacleCoordinates = null;
 		double distance = 0.0;
 		
-		for(int i = 0; i<K || !beaconFound; i++) {
+		for(int i = 0; i<K && !beaconFound; i++) {
 			location = returnCoordinates(location, direction);
 			int x = (int)location.getIntX();
 			int y = (int)location.getIntY();
@@ -66,14 +66,15 @@ public class LaserScannerModel {
 				
 				if (indexOfBeaconListIndex != -1) {
 					distance = (double)i + 1.0;
-					beaconsDistances.add(indexOfBeaconListIndex, distance);
+					DiscoveredBeacon discoveredBeacon = new DiscoveredBeacon(obstacleCoordinates, distance, direction);
+					discoveredBeacons.set(indexOfBeaconListIndex, discoveredBeacon);
 					beaconFound = true;
 				}
 				
 			}
 		}
 		
-		return new Tuple<ArrayList<Double>, Tuple<Point, Double>>(beaconsDistances, new Tuple<Point, Double>(obstacleCoordinates, distance));
+		return new Tuple<ArrayList<DiscoveredBeacon>, Tuple<Point, Double>>(discoveredBeacons, new Tuple<Point, Double>(obstacleCoordinates, distance));
 	}
 	
 	public Point returnCoordinates(Point coordinates, int direction) {
@@ -114,66 +115,76 @@ public class LaserScannerModel {
 		return new Point(x,y);
 	}
 	
-	public Tuple<ArrayList<Double>, ArrayList<Tuple<Point,Double>>> scanArea(Point location) {
-		
-		
-		ArrayList<Double> beaconsFound = (ArrayList<Double>) Arrays.asList(LaserScannerModel.initialiseArray(new Double[this.beaconsList.size()]));
+	public Tuple<ArrayList<DiscoveredBeacon>, ArrayList<Tuple<Point,Double>>> scanArea(Point location) {
+		ArrayList<DiscoveredBeacon> beaconsFound = initialiseBeaconsArrayList();
 		ArrayList<Tuple<Point,Double>> scan = new ArrayList<Tuple<Point,Double>>();
 		
 		for (int i = 0; i<K; i++) {
-			Tuple<ArrayList<Double>, Tuple<Point, Double>> checkBeaconsInDirectionResults = checkBeaconsInDirection(beaconsFound, location, i);
+			Tuple<ArrayList<DiscoveredBeacon>, Tuple<Point, Double>> checkBeaconsInDirectionResults = checkBeaconsInDirection(beaconsFound, location, i);
 			beaconsFound = checkBeaconsInDirectionResults.getA();
 			Tuple<Point, Double> measurement = checkBeaconsInDirectionResults.getB();
 			scan.add(measurement);
 		}
 		
-		return new Tuple<ArrayList<Double>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
+		return new Tuple<ArrayList<DiscoveredBeacon>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
 	}
 	
 	public double computeRangeScanLikelihood(Point location) {
-		ArrayList<Double> beaconsFound = scanArea(location).getA();
+		ArrayList<DiscoveredBeacon>  beaconsFound = scanArea(location).getA();
 		ArrayList<Tuple<Point,Double>> scan = scanArea(location).getB();
-		ArrayList<Tuple<Point,Double>> actualMesaurements = calculateActualMeasurements(scan, location);
-		
+		ArrayList<Tuple<Point,Double>> actualMeasurements = calculateActualMeasurements(scan, location);
+		double sigma = calculateSigma(scan, actualMeasurements);		
 		double q = 1.0;
 		
 		for (int i = 0; i<scan.size(); i++) {
-			
+			double calculatedZ = scan.get(i).getB();
+			double actualZ = actualMeasurements.get(i).getB();
+			double N = calculateN(calculatedZ, actualZ, sigma);
 			
 			
 		}
 		
 		return 0.55555;
+		
+		
+		
 	}
 	
-//	public double calculateN(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMesaurements) {
-//		double calculatedZ = scan.get(i).getB();
-//		double actualZ = actualMesaurements.get(i).getB();
-//		double difference = calculatedZ - actualZ;
-//		double s = Math.pow(difference, 2);
+//	public calculateIta(ArrayList<Tuple<Point,Double>> scan) {
+//		for (int i = 0; i<K; i++) {
+//			
+//		}
 //	}
-//	
 	
+	public double calculateN(double calculatedZ, double actualZ, double sigma) {
+		double squaredDifference = Math.pow(calculatedZ - actualZ, 2);
+		double exponentPower = (-1/2) * (squaredDifference/ Math.pow(sigma, 2));
+		double denominator = Math.sqrt(2 * Math.PI * Math.pow(sigma, 2));
+		return (1/denominator) * Math.exp(exponentPower);
+	}
+
 	public ArrayList<Tuple<Point,Double>> calculateActualMeasurements(ArrayList<Tuple<Point,Double>> scan, Point location) {
 		ArrayList<Tuple<Point,Double>> actualMesaurements = new ArrayList<Tuple<Point,Double>>();
 		
 		for (int i = 0; i<scan.size(); i++) {
 			Point beaconCoordinates = scan.get(i).getA();
-			double actualMeasurement = calculateDistanceBetweenPoints(location, beaconCoordinates);
-			actualMesaurements.add(new Tuple<Point,Double>(beaconCoordinates, actualMeasurement));
+			if (beaconCoordinates != null) {
+				double actualMeasurement = calculateDistanceBetweenPoints(location, beaconCoordinates);
+				actualMesaurements.add(new Tuple<Point,Double>(beaconCoordinates, actualMeasurement));
+			}
 		}
 		
 		return actualMesaurements;
 	}
 	
-	public double calculateSigma(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMesaurements) {
+	public double calculateSigma(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMeasurements) {
 		
 		double sum = 0.0;
 		int sizeOfMeasurement = scan.size();
 		
 		for (int i = 0; i<sizeOfMeasurement; i++) {
 			double calculatedZ = scan.get(i).getB();
-			double actualZ = actualMesaurements.get(i).getB();
+			double actualZ = actualMeasurements.get(i).getB();
 			double difference = calculatedZ - actualZ;
 			double s = Math.pow(difference, 2);
 			sum+=s;
@@ -190,11 +201,14 @@ public class LaserScannerModel {
 		return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));	
 	}
 	
-	public static Double[] initialiseArray(Double[] ar) {
-		for (int i = 0; i<ar.length; i++) {
-			ar[i] = -1.0;
+	public ArrayList<DiscoveredBeacon> initialiseBeaconsArrayList() {
+		ArrayList<DiscoveredBeacon> discoveredBeacons = new ArrayList<DiscoveredBeacon>();
+		
+		for (int i = 0; i<this.beaconsList.size(); i++) {
+			DiscoveredBeacon discoveredBeacon = new DiscoveredBeacon(null, -1.0, -1);
 		}
 		
-		return ar;
+		return discoveredBeacons;
 	}
+	
 }
