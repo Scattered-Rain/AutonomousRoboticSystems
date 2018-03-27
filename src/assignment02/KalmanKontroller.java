@@ -1,5 +1,7 @@
 package assignment02;
 
+import graphing.Frame;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -30,7 +32,7 @@ public class KalmanKontroller{
 	private ANN20 ann;
 	
 	/** Constructs New KalmanKontroller */
-	public void initKalman(boolean[][] map, Point start, double rota){
+	public void initKalman(boolean[][] map, Point start, double rota, Simulator sim){
 		this.collMap = map;
 		this.dustMap = new boolean[collMap.length][collMap[0].length];
 		this.kalman = Kalman.prepKalman(new double[]{start.getX(), start.getY(), rota});
@@ -44,23 +46,26 @@ public class KalmanKontroller{
 	/** Processes Simulation */
 	public double[] process(double[] input, Point loc, double rota){
 		double[] control = ann.process(input);
-		//System.out.println(loc + " " + kalman.getLastMu().get(0, 0)+"|"+kalman.getLastMu().get(1, 0));
-		List<Double> lasDist = las.computeRangeScanLikelihood(loc);
+		System.out.println(loc + " " + kalman.getLastMu().get(0, 0)+"|"+kalman.getLastMu().get(1, 0));
+		List<Tuple<Point,Double>> lasDist = las.findBeacons(loc, collMap, 1.2d);
 		List<Point> beacs = new ArrayList<Point>();
 		List<Double> beacsDists = new ArrayList<Double>();
 		for(int c=0; c<lasDist.size(); c++){
-			System.out.println(lasDist.get(c));
-			if(lasDist.get(c)!=-1){
-				beacs.add(this.beacs.get(c));
-				beacsDists.add(lasDist.get(c));
+			beacs.add(lasDist.get(c).getA());
+			beacsDists.add(lasDist.get(c).getB());
+		}
+		Point probLoc = new Point(kalman.getLastMu().get(0, 0), kalman.getLastMu().get(1, 0));
+		double rott = kalman.getLastMu().get(2, 0);
+		if(beacs.size()>=2){//Good Measure, overwrite
+			Point pp = calcCircleCenter(beacs, beacsDists);
+			if(pp.getX() > 0){
+				probLoc = pp;
 			}
+			//System.out.println(loc+" "+probLoc);
+			rott = rota;
 		}
-		if(beacs.size()>=2){
-			Point probLoc = calcCircleCenter(beacs, beacsDists);
-			System.out.println(loc+" "+probLoc);
-		}
-		kalman.doTheKalman(Simulator.kin(control, kalman.getLastMu().get(2, 0), new Point(0, 0)), makeMatrix(0.1), makeMatrix(0.01), getZ(loc, rota));//new List[]{beacs, las.computeRangeScanLikelihood(loc)});
-		this.rota = kalman.getXLast().get(2, 0);
+		
+		kalman.doTheKalman(Simulator.kin(control, rott, new Point(0, 0)), makeMatrix(0.1), makeMatrix(0.001), getZ(probLoc, rott));//new List[]{beacs, las.computeRangeScanLikelihood(loc)});
 		return new double[]{control[0], control[1]};
 	}
 	

@@ -24,9 +24,9 @@ import javax.swing.Timer;
 
 import util.Point;
 import assignment01.BotEvolution;
-import assignment01.Simulator;
-import assignment01.Simulator.Action;
-import assignment01.Simulator.Recorder;
+import assignment02.Simulator;
+import assignment02.Simulator.Action;
+import assignment02.Simulator.Recorder;
 import lombok.Getter;
 
 public class Frame extends JFrame{

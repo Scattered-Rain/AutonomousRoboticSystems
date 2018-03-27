@@ -28,6 +28,11 @@ public class Point{
 		}
 	}
 	
+	/** Returns the angle between this vector (xy) to the given where scaled to 1, i.e. 360 degrees = 1.0*/
+	public double calcAngle(Point vector){
+		return (Math.toDegrees(Math.acos(((x*y) + (vector.x*vector.y))/(Math.sqrt(Math.pow(x, 2)+Math.pow(y, 2))*Math.sqrt(Math.pow(vector.x, 2)+Math.pow(vector.y, 2)))))%360)/360;
+	}
+	
 	/** Returns the distances between this and the given point */
 	public double distance(Point point){
 		return Math.sqrt(Math.pow(x-point.x, 2)+Math.pow(y-point.y, 2));

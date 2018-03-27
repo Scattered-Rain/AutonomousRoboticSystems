@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import assignment01.Kinematics;
+import assignment01.Simulator.Action;
 import graphing.Frame;
 import util.Point;
 import lombok.AllArgsConstructor;
@@ -53,7 +54,7 @@ public class Simulator{
 	/** Simulates Robot */
 	public double simulate(KalmanKontroller controller, int randomSeed, boolean record){
 		final double sensorRange = 0.9;
-		final int iterations = 9999;
+		final int iterations = 500;
 		//randomSeed = 12011994;//TODO: Debug, plox remove, thankz
 		Random rand = new Random(randomSeed);
 		Recorder rec = null;
@@ -76,7 +77,7 @@ public class Simulator{
 		double[] sensorIns = new double[12];
 		double[] dustSensor = new double[sensorIns.length+1];//Dust sensor, where index 12 is dust on self, and 0-11 are dust on corresponding sensor reach
 		
-		controller.initKalman(map, new Point(x, y), rota);
+		controller.initKalman(map, new Point(x, y), rota, this);
 		
 		for(int c=0; c<iterations; c++){
 			if(record){
@@ -185,6 +186,19 @@ public class Simulator{
 		if(record){
 			this.simRecords.add(rec);
 		}
+		Frame frame = new Frame(600, 480, 1, this.getSimRecords().get(0));
+		final Recorder reccc = this.getSimRecords().get(0);
+		try{
+			new Thread(new Runnable(){
+				//runs it's part
+				public void run(){
+					for(Action a : reccc.getActions()){
+						frame.update(a);
+						try{Thread.sleep(100);}catch(Exception ex){}
+					}
+				}
+			}).start();
+		}catch(Exception ex){}
 		return out;//999.0;//wheels[0] + wheels[1];
 	}
 	

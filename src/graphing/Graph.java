@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import assignment01.Simulator.Recorder;
+import assignment02.Simulator.Recorder;
 
 /** Builds and renders graphing things */
 public class Graph extends Frame{

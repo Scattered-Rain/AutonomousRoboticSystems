@@ -14,12 +14,13 @@ import graphing.GraphElement;
 public class DebugLaunch{
 	
 	public static void main(String[] args){
-		ANN output;
-		new BotEvolution().initEvolution();
+//		ANN output;
+//		new BotEvolution().initEvolution();
 		//double[] pasd = Kinematics.calculatePosition(new Point(0.5, 0), new Point(0, 0), 0.0);
 		//System.out.println(pasd[0]+" "+pasd[1]+" "+pasd[2]);
 		//System.out.println(output);
 		//new Frame(0,0,0);
+		System.out.println(new Point(1, 4).calcAngle(new Point(-1, 1)));
 	}
 	
 	

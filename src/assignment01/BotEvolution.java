@@ -129,20 +129,20 @@ public class BotEvolution{
 			//System.out.println();
 			//draw best individual
 			if((generations==10 || generations%100==0) && generations!=0){
-				try{
-					new Thread(new Runnable(){
-						//runs it's part
-						public void run(){
-							sim.simulate(repANNs[0], repANNs[0].getSimSeed(), true);
-							Simulator.Recorder rec = sim.getSimRecords().get(sim.getSimRecords().size()-1);
-							Frame f = new Frame(600, 400, 0, rec);
-							for(Action a : rec.getActions()){
-								f.update(a);
-								try{Thread.sleep(100);}catch(Exception ex){}
-							}
-						}
-					}).start();
-				}catch(Exception ex){}
+//				try{
+//					new Thread(new Runnable(){
+//						//runs it's part
+//						public void run(){
+//							sim.simulate(repANNs[0], repANNs[0].getSimSeed(), true);
+//							Simulator.Recorder rec = sim.getSimRecords().get(sim.getSimRecords().size()-1);
+//							Frame f = new Frame(600, 400, 0, rec);
+//							for(Action a : rec.getActions()){
+//								f.update(a);
+//								try{Thread.sleep(100);}catch(Exception ex){}
+//							}
+//						}
+//					}).start();
+//				}catch(Exception ex){}
 			}
 			//write population to file
 			if(generations%100==0){
