@@ -61,17 +61,13 @@ public class LaserScannerModel {
 			int x = (int)location.getIntX();
 			int y = (int)location.getIntY();
 			
-			try{
-				if (this.getOccupancyGridMap()[y][x]) {
-					obstacleCoordinates = new Point(x, y);
-					int indexOfBeaconListIndex = this.beaconsList.indexOf(obstacleCoordinates);
-					
-					if (indexOfBeaconListIndex != -1) {
-						distance = (double)i + 1.0;
-						beaconsFound.add(indexOfBeaconListIndex, distance);
-						beaconFound = true;
-					}
-					
+			if (this.getOccupancyGridMap()[x][y]) {
+				obstacleCoordinates = new Point(x, y);
+				int indexOfBeaconListIndex = this.beaconsList.indexOf(obstacleCoordinates);
+				
+				if (indexOfBeaconListIndex != -1) {
+					distance = (double)i + 1.0;
+					DiscoveredBeacon discoveredBeacon = new DiscoveredBeacon(obstacleCoordinates, distance, direction);
 				}
 			}catch(Exception ex){}
 		}
@@ -130,19 +126,24 @@ public class LaserScannerModel {
 			scan.add(measurement);
 		}
 		
-		return new Tuple<List<Double>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
+		return new Tuple<ArrayList<DiscoveredBeacon>, ArrayList<Tuple<Point,Double>>>(beaconsFound, scan);
 	}
 	
-	public List<Double> computeRangeScanLikelihood(Point location) {
-		List<Double> beaconsFound = scanArea(location).getA();
+	public double computeRangeScanLikelihood(Point location) {
+		ArrayList<DiscoveredBeacon>  beaconsFound = scanArea(location).getA();
 		ArrayList<Tuple<Point,Double>> scan = scanArea(location).getB();
-		ArrayList<Tuple<Point,Double>> actualMesaurements = calculateActualMeasurements(scan, location);
-		
+		ArrayList<Tuple<Point,Double>> actualMeasurements = calculateActualMeasurements(scan, location);
+		double sigma = calculateSigma(scan, actualMeasurements);		
 		double q = 1.0;
 		
 		for (int i = 0; i<scan.size(); i++) {
+			double calculatedZ = scan.get(i).getB();
+			double actualZ = actualMeasurements.get(i).getB();
+			double N = calculateN(calculatedZ, actualZ, sigma);
 			
 			
+		}
+		
 			
 		}
 		
@@ -151,18 +152,27 @@ public class LaserScannerModel {
 	
 //	public double calculateN(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMesaurements) {
 //		double calculatedZ = scan.get(i).getB();
-//		double actualZ = actualMesaurements.get(i).getB();
-//		double difference = calculatedZ - actualZ;
-//		double s = Math.pow(difference, 2);
-//	}
-//	
+	}
 	
+//	public calculateIta(ArrayList<Tuple<Point,Double>> scan) {
+//		for (int i = 0; i<K; i++) {
+//			
+//		}
+//	}
+	
+	public double calculateN(double calculatedZ, double actualZ, double sigma) {
+		double squaredDifference = Math.pow(calculatedZ - actualZ, 2);
+		double exponentPower = (-1/2) * (squaredDifference/ Math.pow(sigma, 2));
+		double denominator = Math.sqrt(2 * Math.PI * Math.pow(sigma, 2));
+		return (1/denominator) * Math.exp(exponentPower);
+	}
+
 	public ArrayList<Tuple<Point,Double>> calculateActualMeasurements(ArrayList<Tuple<Point,Double>> scan, Point location) {
 		ArrayList<Tuple<Point,Double>> actualMesaurements = new ArrayList<Tuple<Point,Double>>();
 		
 		for (int i = 0; i<scan.size(); i++) {
 			Point beaconCoordinates = scan.get(i).getA();
-			if(beaconCoordinates != null){
+			if (beaconCoordinates != null) {
 				double actualMeasurement = calculateDistanceBetweenPoints(location, beaconCoordinates);
 				actualMesaurements.add(new Tuple<Point,Double>(beaconCoordinates, actualMeasurement));
 			}
@@ -171,14 +181,14 @@ public class LaserScannerModel {
 		return actualMesaurements;
 	}
 	
-	public double calculateSigma(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMesaurements) {
+	public double calculateSigma(ArrayList<Tuple<Point,Double>> scan, ArrayList<Tuple<Point,Double>> actualMeasurements) {
 		
 		double sum = 0.0;
 		int sizeOfMeasurement = scan.size();
 		
 		for (int i = 0; i<sizeOfMeasurement; i++) {
 			double calculatedZ = scan.get(i).getB();
-			double actualZ = actualMesaurements.get(i).getB();
+			double actualZ = actualMeasurements.get(i).getB();
 			double difference = calculatedZ - actualZ;
 			double s = Math.pow(difference, 2);
 			sum+=s;
@@ -195,11 +205,59 @@ public class LaserScannerModel {
 		return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));	
 	}
 	
-	public static Double[] initialiseArray(Double[] ar) {
-		for (int i = 0; i<ar.length; i++) {
-			ar[i] = -1.0;
+	public ArrayList<DiscoveredBeacon> initialiseBeaconsArrayList() {
+		ArrayList<DiscoveredBeacon> discoveredBeacons = new ArrayList<DiscoveredBeacon>();
+		
+		for (int i = 0; i<this.beaconsList.size(); i++) {
+			DiscoveredBeacon discoveredBeacon = new DiscoveredBeacon(null, -1.0, -1);
 		}
 		
-		return ar;
+		return discoveredBeacons;
 	}
+	
+	
+	public static Point findXfromBeacons(List<Point> beacons, List<Double> distance){
+		int i=0;
+		int flag =0;
+		List<Integer> indexes = new ArrayList<Integer>();
+		while(i < distance.size() && flag<3) {
+			if(distance.get(i)!=-1){
+				flag++;
+				indexes.add(i);
+			}
+			i++;
+		}
+		if (flag<3){
+			return null;
+		}else{
+			//System.out.println(flag+"\n"+indexes);
+			double a = Math.sqrt(Math.pow((beacons.get(indexes.get(1)).getIntX()-beacons.get(indexes.get(0)).getIntX()),2) + Math.pow((beacons.get(indexes.get(1)).getIntY()-beacons.get(indexes.get(0)).getIntY()),2));
+			double xx = (Math.pow(a, 2) + Math.pow(distance.get(indexes.get(0)),2) - Math.pow(distance.get(indexes.get(1)),2)) / (2*a);
+			double yy = Math.sqrt(Math.pow(distance.get(indexes.get(0)),2) - Math.pow(xx, 2));
+			double yyminus = -yy;
+			//System.out.println(xx);
+			Point x = new Point(xx,yy);
+			Point xtonos = new Point(xx,yyminus);
+			System.out.println(x);
+			System.out.println(xtonos);
+			a = Math.sqrt(Math.pow((beacons.get(indexes.get(2)).getIntX()-beacons.get(indexes.get(1)).getIntX()),2) + Math.pow((beacons.get(indexes.get(2)).getIntY()-beacons.get(indexes.get(1)).getIntY()),2));
+			xx = (Math.pow(a, 2) + Math.pow(distance.get(indexes.get(1)),2) - Math.pow(distance.get(indexes.get(2)),2)) / (2*a);
+			yy = Math.sqrt(Math.pow(distance.get(indexes.get(1)),2) - Math.pow(xx, 2));
+			Point xdistono = new Point(xx,yy);
+			Point xtreistono = new Point(xx,-yy);
+			System.out.println(xdistono);
+			System.out.println(xtreistono);
+			if (x.equals(xdistono) || x.equals(xtreistono)){
+				return x;
+			}
+			if (xtonos.equals(xdistono) || xtonos.equals(xtreistono)){
+				return xtonos;
+			}
+			
+			return null;
+		}
+		
+	}
+	
+	
 }
