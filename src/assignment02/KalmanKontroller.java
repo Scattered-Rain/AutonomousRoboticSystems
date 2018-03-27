@@ -42,6 +42,7 @@ public class KalmanKontroller{
 		this.ann = ANN20.buildFromFile(new int[]{27, 2, 8}, "test0", null);
 	}
 	
+	double[] temp;
 	
 	/** Processes Simulation */
 	public double[] process(double[] input, Point loc, double rota){
@@ -64,9 +65,13 @@ public class KalmanKontroller{
 			//System.out.println(loc+" "+probLoc);
 			rott = rota;
 		}
-		
+		this.temp = new double[]{probLoc.getX(), probLoc.getY(), rott};
 		kalman.doTheKalman(Simulator.kin(control, rott, new Point(0, 0)), makeMatrix(0.1), makeMatrix(0.001), getZ(probLoc, rott));//new List[]{beacs, las.computeRangeScanLikelihood(loc)});
 		return new double[]{control[0], control[1]};
+	}
+	
+	public double[] reccc(){
+		return temp;
 	}
 	
 	/** Makes vals I*val matrix */

@@ -81,7 +81,8 @@ public class Simulator{
 		
 		for(int c=0; c<iterations; c++){
 			if(record){
-				rec.add(new Action(x, y, rota));
+				Point p = new Point(0, 0);
+				rec.add(new Action(x, y, rota, p));
 			}
 			//If the Simulated bot is controlled by a human, only iterate if a new command has been sent, otherwise stall.
 			if(humanController!=null){
@@ -175,6 +176,7 @@ public class Simulator{
 			//Add anti-dust
 			dustSensor[dustSensor.length-1] = !dust[(int)y][(int)x]?1:0;
 			dust[(int)y][(int)x] = true;
+			rec.getActions().get(rec.getActions().size()-1).assumed = new Point(controller.reccc()[0], controller.reccc()[1]);
 		}
 		//Calculate score
 		double out = 0;
@@ -194,7 +196,7 @@ public class Simulator{
 				public void run(){
 					for(Action a : reccc.getActions()){
 						frame.update(a);
-						try{Thread.sleep(100);}catch(Exception ex){}
+						try{Thread.sleep(1000);}catch(Exception ex){}
 					}
 				}
 			}).start();
@@ -250,11 +252,14 @@ public class Simulator{
 		/** The Sensor Points */
 		@Getter @Setter private List<Point> sensors;
 		
-		public Action(double x, double y, double rotation){
+		public Point assumed;
+		
+		public Action(double x, double y, double rotation, Point assumed){
 			this.x = x;
 			this.y = y;
 			this.rotation = rotation;
 			this.sensors = new ArrayList<Point>();
+			this.assumed = assumed;
 		}
 		
 		public String toString(){

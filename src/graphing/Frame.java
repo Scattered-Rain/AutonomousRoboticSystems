@@ -37,7 +37,7 @@ public class Frame extends JFrame{
 	 *  Will, When Printed, Automatically Be Scaled To Fit The Frame. */
 	private BufferedImage bufferImage;
 		
-	int SCALE = 20;
+	int SCALE = 50;
 	
 	
     int x;
@@ -162,6 +162,11 @@ public class Frame extends JFrame{
             			g.fillOval(((int)(seen.getX()*SCALE))-SCALE/4/2, ((int)(seen.getY()*SCALE))-SCALE/4/2, SCALE/4, SCALE/4);
             		}
             	}
+    			g.setColor(Color.GREEN);
+    			try{
+    				int s = SCALE/2;
+        			g.fillOval((int)(lastAction.assumed.getX()*SCALE-s/2), (int)(lastAction.assumed.getY()*SCALE-s/2), s, s);
+    			}catch(Exception ex){}
     			g.setColor(col);
         	}
         }
